@@ -33,8 +33,15 @@ export const MobileStaticPage = () => {
         return (
           <div style={styles.content}>
             <div style={styles.logoSection}>
-              <div style={styles.logoBadge}>🛍️</div>
-              <h2 style={styles.title}>About Freshio Market</h2>
+              <div style={{
+                ...styles.logoBadge,
+                backgroundColor: '#EAF8F0',
+                padding: '12px',
+                boxSizing: 'border-box'
+              }}>
+                <img src="/icon.png" alt="Freshio Icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              <h2 style={styles.title}>Freshio Kigali</h2>
               <p style={styles.subtitle}>Kigali's Premium Grocer Partner</p>
             </div>
             <div style={styles.card}>

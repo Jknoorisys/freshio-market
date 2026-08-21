@@ -162,9 +162,16 @@ export const MobileAccount = () => {
           <div style={styles.authContainer}>
             {/* Logo details */}
             <div style={styles.logoHeader}>
-              <div style={styles.logoCircle}>🛍️</div>
-              <h2 style={styles.logoTitle}>Freshio Kigali</h2>
-              <p style={styles.logoDesc}>Kigali's finest Sawa Citi groceries at your fingertips.</p>
+              <div style={{
+                ...styles.logoCircle,
+                backgroundColor: '#EAF8F0',
+                padding: '12px',
+                boxSizing: 'border-box'
+              }}>
+                <img src="/icon.png" alt="Freshio Icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              <h2 style={styles.logoTitle}>Freshio Market</h2>
+              <p style={styles.logoDesc}>Kigali's Fresh Choice</p>
             </div>
 
             {/* Tab switchers */}

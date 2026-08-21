@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { PRODUCTS } from '../../data/mockData'; // Direct mockData import to fix missing products
-import { Logo } from '../../components/Logo'; // Import custom Logo branding
+import { PRODUCTS } from '../../data/mockData'; 
+import { Logo } from '../../components/Logo';
 
 export const MobileHome = () => {
   const navigate = useNavigate();
@@ -16,6 +16,9 @@ export const MobileHome = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSlide, setActiveSlide] = useState(0);
+  
+  // Track adding state of product IDs for active click feedback
+  const [addingIds, setAddingIds] = useState(new Set());
 
   // Auto carousel slideshow timer (4 seconds per slide)
   useEffect(() => {
@@ -38,6 +41,27 @@ export const MobileHome = () => {
 
   const isWishlisted = (id) => wishlist.includes(id);
 
+  const handleAddToCartFeedback = (e, prod) => {
+    e.stopPropagation();
+    addToCart(prod, 1);
+    
+    // Add ID to adding list
+    setAddingIds((prev) => {
+      const next = new Set(prev);
+      next.add(prod.id);
+      return next;
+    });
+
+    // Remove ID from adding list after 1.2 seconds
+    setTimeout(() => {
+      setAddingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(prod.id);
+        return next;
+      });
+    }, 1200);
+  };
+
   // Dynamically load the first 8 featured/best-rated organic or fresh produce products from the products database
   const dynamicFeaturedProducts = useMemo(() => {
     const db = PRODUCTS || [];
@@ -52,36 +76,41 @@ export const MobileHome = () => {
     return list.slice(0, 10);
   }, []);
 
-  // Category circles data mapped directly from your design template
+  // Curated category items with high-resolution Unsplash images and light HSL colors
   const mockupCategories = [
     {
       name: 'Fruits',
       slug: 'fresh-produce',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFGRs4C_-UvrmyLKM4fxerphyp5mFbzK5J1IxNwSnBQ6ivHRpkzzzYOn5Y9Ct6rOX8-ETqRk65rafHHHZAxm7svKjQ2T5kQO55K7k8jC2jIj4cmkHvGYVxvHu7UsonwWAZyphMYd-J5yUS_vSJei0BE4dGM2lsjo_miFHoGJahwAHxv-fiTEZS7NW8b-A-iW12nfI44O10DkEnubcS_aiI94zvon7mqE7ZwKcNrnVHQlIyuMT4DTc-kw',
+      img: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=150&h=150&q=80',
+      bgColor: '#FFEAEB'
     },
     {
       name: 'Vegetables',
       slug: 'fresh-produce',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCz7OJ_oGZAdhXTNlKB3rbNs0T3WxlgosOVEle_quuSEPHSe-V1zbCa8B2d8icvYEZrw2KnpR1XigE1CVmJosWxYmVDmHz1Hd5msNOGE_PNbMUKk_ITTU6CjQfrHmzkVWqzegMb-HKCRbumpsNp3mgXKnOCMcmKZ4ZW1n3xuurwxjhDcHTgUJWNrDHj3Y17JPzd9wQA70mWhzybAot7W7DKvTeABYFDPG9zzZ4UHI1o4agD7bnTk75MvA',
+      img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=150&h=150&q=80',
+      bgColor: '#EAF8F0'
     },
     {
       name: 'Meat',
       slug: 'meat-fish',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCRGNBgnP9yiXxadkL9VKd_pFuwXA3zg33Sw3K3IFT8M33sP24B3AJ6Plk1D7hnbZuFbtkiNmmtRpNlJx-KMXVD1igWFOrvDB2zdYF59ZyR0DP_kGDKvBfjygJF5PjhrtNd7mOdbk6sjANExJfh_fKRdriMkVsVAKqibOgz7UZS3qUi4UPEC_DqouyyloidSnTd-bwj_zTQcSbxXsQYKQfW7tplHSuvUf_evoXcktlpjch1BqkzukyuBQ',
+      img: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=150&h=150&q=80',
+      bgColor: '#FFF3EC'
     },
     {
       name: 'Dairy',
       slug: 'dairy',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuANiUahGVX8Y2NHXPKkoYff70AxoVSllfzm0NpERCuJ1oiGSlUh5wXKgSu2F_NtvSbhsA8rZrnrQfb9urBYLe-hnTp7D7wu-13PpJ1NqsMtYZwj0zmiIs2vY1Usz0VrbEUesAV7HAeUMb3ebecP3iQqBy-9Rdq75Q28AYLV17CQa9FHl9SqSJTnGWvgdwNXacpt5NEdQ5u5tPh4cTjxuv6kFT7hg1-BxRN5vXP_DgyZZrITHbXEgPr1Ng',
+      img: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=150&h=150&q=80',
+      bgColor: '#E6F4FF'
     },
     {
       name: 'Bakery',
       slug: 'groceries',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC4vuTcJvVMJ_vGBUmuxqiiZhKe6nLMUC6knCaoqvNKzz57C7dxmAoB5R0SWU4Ezz2QuA8-JnapB2oLwymID2ykXvp8O6BkwYZkTeultuNmjEdgQYWjp7rEam5vgD5jh040PNrrBCr6F1tMA6_DzfnkAXG2EIbH0cnvt1hDLyUDbFo4OrNOinJtoYnfnweQFvZVUwDbhiKh255_CgLugIynxjWdCTVmKWL7TXTdH9GeJYgVaVWjnRNbOA',
+      img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=150&h=150&q=80',
+      bgColor: '#FEF8EB'
     }
   ];
 
-  // Static Slide structures
+  // Slide structures
   const promoSlides = [
     {
       badge: 'Limited Offer',
@@ -116,7 +145,7 @@ export const MobileHome = () => {
   ];
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="app-home-canvas animate-fade-in">
       {/* Sticky App Header */}
       <header style={styles.header}>
         <div style={styles.headerTopRow}>
@@ -125,18 +154,19 @@ export const MobileHome = () => {
           </div>
           <div style={styles.headerRight}>
             <div style={styles.cartIconWrapper} onClick={() => navigate('/mobile/cart')}>
-              <button style={styles.iconBtn}>
+              <button style={styles.iconBtn} className="header-cart-icon-btn">
                 <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>shopping_cart</span>
               </button>
               {getCartCount() > 0 && (
-                <span style={styles.cartBadge}>{getCartCount()}</span>
+                <span style={styles.cartBadge} className="animate-pop">{getCartCount()}</span>
               )}
             </div>
             <img
               alt="Profile"
               style={styles.profileAvatar}
-              src={user?.avatar || 'https://api.dicebear.com/7.x/adventurer/svg?seed=FreshioGuest'}
+              src={user?.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80'}
               onClick={() => navigate('/mobile/account')}
+              className="header-avatar"
             />
           </div>
         </div>
@@ -154,9 +184,9 @@ export const MobileHome = () => {
 
       {/* Main Content Area */}
       <main style={styles.mainCanvas}>
-        {/* Promotional Carousel Section (Auto Slide Carousel) */}
+        {/* Promotional Carousel Section */}
         <section style={styles.promoSection}>
-          <div style={styles.promoCarouselContainer}>
+          <div style={styles.promoCarouselContainer} className="promo-depth-shadow">
             <div
               style={{
                 ...styles.promoFlexRow,
@@ -170,6 +200,7 @@ export const MobileHome = () => {
                       ...styles.promoBg,
                       backgroundImage: `url('${slide.bg}')`,
                     }}
+                    className="promo-image-zoom"
                   />
                   <div style={{ ...styles.promoOverlay, background: slide.overlay }}>
                     <span style={{ ...styles.promoBadge, backgroundColor: slide.badgeColor }}>
@@ -197,14 +228,15 @@ export const MobileHome = () => {
                     backgroundColor: activeSlide === index ? '#006b32' : 'rgba(0, 0, 0, 0.15)',
                     width: activeSlide === index ? '16px' : '6px',
                   }}
+                  className="carousel-dot-indicator"
                 />
               ))}
             </div>
           </div>
         </section>
 
-        {/* Categories Section */}
-        <section style={styles.section}>
+        {/* Redesigned Premium Category Cards */}
+        <section style={styles.section} className="section-categories">
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Categories</h3>
             <button style={styles.seeAllBtn} onClick={() => navigate('/mobile/shop')}>See All</button>
@@ -213,12 +245,15 @@ export const MobileHome = () => {
             {mockupCategories.map((cat, idx) => (
               <button
                 key={idx}
-                style={styles.categoryButton}
+                style={{
+                  ...styles.categoryCard,
+                  backgroundColor: cat.bgColor,
+                  animationDelay: `${idx * 0.05}s`
+                }}
                 onClick={() => navigate(`/mobile/category/${cat.slug}`)}
+                className="category-interactive-card"
               >
-                <div style={styles.categoryCircle}>
-                  <img src={cat.img} alt={cat.name} style={styles.categoryImg} />
-                </div>
+                <img src={cat.img} alt={cat.name} style={styles.categoryImg} />
                 <span style={styles.categoryLabel}>{cat.name}</span>
               </button>
             ))}
@@ -232,20 +267,30 @@ export const MobileHome = () => {
             <button style={styles.seeAllBtn} onClick={() => navigate('/mobile/shop')}>View All</button>
           </div>
           <div style={styles.grid}>
-            {dynamicFeaturedProducts.map((prod) => {
+            {dynamicFeaturedProducts.map((prod, idx) => {
               const wishlisted = isWishlisted(prod.id);
+              const isAdding = addingIds.has(prod.id);
+              
               return (
-                <div key={prod.id} style={styles.productCard}>
+                <div 
+                  key={prod.id} 
+                  style={{
+                    ...styles.productCard,
+                    animationDelay: `${idx * 0.08}s`
+                  }}
+                  className="product-card-staggered"
+                >
                   {/* Heart Wishlist Trigger */}
                   <button
                     style={{
                       ...styles.heartBtn,
-                      color: wishlisted ? '#FF5A5F' : '#3e4a3f'
+                      color: wishlisted ? '#FF5A5F' : '#3e4a3f',
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleWishlist(prod.id);
                     }}
+                    className="card-heart-btn"
                   >
                     <span
                       className="material-symbols-outlined"
@@ -260,11 +305,11 @@ export const MobileHome = () => {
 
                   {/* Top Left Badges */}
                   {prod.discount > 0 ? (
-                    <span style={{ ...styles.cardBadge, backgroundColor: '#FF9F43' }}>
+                    <span style={{ ...styles.cardBadge, backgroundColor: '#FF9F43' }} className="animate-pop">
                       -{prod.discount}%
                     </span>
                   ) : prod.isFeatured ? (
-                    <span style={{ ...styles.cardBadge, backgroundColor: '#61B478' }}>
+                    <span style={{ ...styles.cardBadge, backgroundColor: '#61B478' }} className="animate-pop">
                       Organic
                     </span>
                   ) : null}
@@ -273,8 +318,9 @@ export const MobileHome = () => {
                   <div
                     style={styles.cardImgWrapper}
                     onClick={() => navigate(`/mobile/product/${prod.id}`)}
+                    className="card-image-glow-wrapper"
                   >
-                    <img src={prod.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=300&q=80'} alt={prod.name} style={styles.cardImg} />
+                    <img src={prod.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=300&q=80'} alt={prod.name} style={styles.cardImg} className="card-product-img" />
                   </div>
 
                   {/* Card Info */}
@@ -294,12 +340,23 @@ export const MobileHome = () => {
                           <span style={styles.wasPriceVal}>{prod.originalPrice} RWF</span>
                         )}
                       </div>
+                      
+                      {/* Plus button with spring scale feedback */}
                       <button
-                        style={styles.addBtn}
-                        onClick={() => addToCart(prod, 1)}
+                        style={{
+                          ...styles.addBtn,
+                          backgroundColor: isAdding ? '#20B86B' : '#006b32',
+                          transform: isAdding ? 'scale(1.15) rotate(90deg)' : 'scale(1)',
+                          boxShadow: isAdding ? '0 6px 16px rgba(32, 184, 107, 0.4)' : '0 4px 12px rgba(39, 158, 83, 0.2)'
+                        }}
+                        onClick={(e) => handleAddToCartFeedback(e, prod)}
                         aria-label="Add to cart"
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
+                        {isAdding ? (
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
+                        ) : (
+                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -315,7 +372,7 @@ export const MobileHome = () => {
 
 const styles = {
   container: {
-    backgroundColor: '#fbf9f3', // surface color variable matching bg
+    backgroundColor: '#fbf9f3',
     minHeight: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -327,9 +384,9 @@ const styles = {
     top: 0,
     width: '100%',
     zIndex: 50,
-    backgroundColor: 'rgba(251, 249, 243, 0.8)',
-    backdropFilter: 'blur(16px)',
-    boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
+    backgroundColor: 'rgba(251, 249, 243, 0.85)',
+    backdropFilter: 'blur(20px)',
+    boxShadow: '0 1px 8px rgba(0,0,0,0.03)',
     paddingTop: 'env(safe-area-inset-top)',
     display: 'flex',
     flexDirection: 'column',
@@ -348,28 +405,10 @@ const styles = {
     alignItems: 'center',
     gap: '16px',
   },
-  menuBtn: {
-    width: '44px',
-    height: '44px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: '-8px',
-    color: '#3e4a3f',
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-  },
-  logoText: {
-    fontSize: '18px',
-    fontWeight: '800',
-    color: '#006b32', // primary brand color
-    fontFamily: 'var(--font-sans)',
-  },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '14px',
   },
   iconBtn: {
     width: '44px',
@@ -381,6 +420,7 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     color: '#3e4a3f',
+    outline: 'none',
   },
   cartIconWrapper: {
     position: 'relative',
@@ -392,9 +432,9 @@ const styles = {
     right: '6px',
     width: '16px',
     height: '16px',
-    backgroundColor: '#FF5A5F', // error-red
+    backgroundColor: '#FF5A5F',
     color: '#FFFFFF',
-    fontSize: '10px',
+    fontSize: '9px',
     fontWeight: 'bold',
     display: 'flex',
     alignItems: 'center',
@@ -408,6 +448,7 @@ const styles = {
     borderRadius: '50%',
     objectFit: 'cover',
     cursor: 'pointer',
+    border: '2px solid rgba(0, 107, 50, 0.1)',
   },
   searchContainer: {
     position: 'relative',
@@ -427,12 +468,14 @@ const styles = {
     paddingRight: '16px',
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8ECE9',
-    borderRadius: '8px',
+    borderRadius: '10px',
     fontSize: '14px',
     color: '#1b1c19',
     outline: 'none',
     boxSizing: 'border-box',
     fontFamily: 'inherit',
+    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
+    transition: 'all 0.3s ease',
   },
   mainCanvas: {
     flexGrow: 1,
@@ -453,7 +496,7 @@ const styles = {
   promoFlexRow: {
     display: 'flex',
     width: '100%',
-    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
   },
   promoCard: {
     width: '100%',
@@ -471,21 +514,22 @@ const styles = {
   promoOverlay: {
     position: 'absolute',
     inset: 0,
-    padding: '16px',
+    padding: '18px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     boxSizing: 'border-box',
+    zIndex: 2,
   },
   promoBadge: {
     alignSelf: 'flex-start',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '10px',
-    fontWeight: 'bold',
+    padding: '3px 8px',
+    borderRadius: '5px',
+    fontSize: '9px',
+    fontWeight: '800',
     color: '#FFFFFF',
     textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    letterSpacing: '0.08em',
     marginBottom: '8px',
   },
   promoTitle: {
@@ -501,7 +545,7 @@ const styles = {
   },
   dotsRow: {
     position: 'absolute',
-    bottom: '8px',
+    bottom: '10px',
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
@@ -512,7 +556,7 @@ const styles = {
   dot: {
     height: '6px',
     borderRadius: '3px',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
     cursor: 'pointer',
   },
   section: {
@@ -538,49 +582,49 @@ const styles = {
     backgroundColor: 'transparent',
     border: 'none',
     cursor: 'pointer',
+    outline: 'none',
   },
   categoryScroll: {
     display: 'flex',
     overflowX: 'auto',
-    gap: '16px',
-    padding: '0 20px 8px 20px',
+    gap: '14px',
+    padding: '0 20px 12px 20px',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
     '&::-webkit-scrollbar': {
       display: 'none',
     }
   },
-  categoryButton: {
+  categoryCard: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '8px',
-    flexShrink: 0,
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-  },
-  categoryCircle: {
-    width: '72px',
-    height: '72px',
-    borderRadius: '50%',
-    backgroundColor: '#FFFFFF',
-    boxShadow: '0 4px 12px rgba(23,37,31,0.04)',
-    display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
-    transition: 'transform 0.15s',
+    gap: '8px',
+    width: '84px',
+    height: '110px',
+    borderRadius: '16px',
+    flexShrink: 0,
+    border: '1.5px solid rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 4px 12px rgba(23,37,31,0.02)',
+    cursor: 'pointer',
+    outline: 'none',
+    boxSizing: 'border-box',
+    padding: '8px',
+    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
   },
   categoryImg: {
-    width: '40px',
-    height: '40px',
-    objectFit: 'contain',
-    mixBlendMode: 'multiply',
+    width: '56px',
+    height: '56px',
+    borderRadius: '12px',
+    objectFit: 'cover',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
+    transition: 'transform 0.3s ease',
   },
   categoryLabel: {
-    fontSize: '12px',
-    fontWeight: '600',
-    color: '#3e4a3f',
+    fontSize: '11px',
+    fontWeight: '800',
+    color: '#1b1c19',
   },
   grid: {
     display: 'grid',
@@ -592,11 +636,12 @@ const styles = {
     backgroundColor: '#FFFFFF',
     borderRadius: '16px',
     padding: '12px',
-    boxShadow: '0 4px 16px rgba(23,37,31,0.04)',
+    boxShadow: '0 4px 16px rgba(23,37,31,0.03)',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
     boxSizing: 'border-box',
+    animation: 'fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',
   },
   heartBtn: {
     position: 'absolute',
@@ -609,17 +654,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    outline: 'none',
   },
   cardBadge: {
     position: 'absolute',
     top: '12px',
     left: '12px',
     color: '#FFFFFF',
-    fontSize: '10px',
+    fontSize: '9px',
     fontWeight: 'bold',
-    padding: '2px 6px',
-    borderRadius: '4px',
+    padding: '3px 7px',
+    borderRadius: '5px',
     zIndex: 10,
+    letterSpacing: '0.5px',
   },
   cardImgWrapper: {
     width: '100%',
@@ -628,11 +675,13 @@ const styles = {
     overflow: 'hidden',
     backgroundColor: '#f5f3ee',
     marginBottom: '12px',
+    position: 'relative',
   },
   cardImg: {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
+    transition: 'transform 0.5s ease',
   },
   cardInfo: {
     display: 'flex',
@@ -681,15 +730,86 @@ const styles = {
     width: '32px',
     height: '32px',
     borderRadius: '50%',
-    backgroundColor: '#006b32',
     color: '#FFFFFF',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     border: 'none',
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(39, 158, 83, 0.2)',
+    outline: 'none',
   }
 };
+
+// Inject CSS style rules
+if (typeof document !== 'undefined') {
+  const styleId = 'mobile-premium-home-animations';
+  if (!document.getElementById(styleId)) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = styleId;
+    styleSheet.textContent = `
+      @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes popIn {
+        0% { transform: scale(0.85); opacity: 0; }
+        80% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      
+      .animate-fade-in {
+        animation: fadeInUp 0.5s ease-out both;
+      }
+      .animate-pop {
+        animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      }
+      
+      /* Card Hover/Tap Zoom effects */
+      .product-card-staggered:active {
+        transform: scale(0.97);
+        box-shadow: 0 2px 8px rgba(23,37,31,0.02) !important;
+      }
+      .product-card-staggered:hover .card-product-img {
+        transform: scale(1.06);
+      }
+      
+      /* Category interactive cards */
+      .category-interactive-card {
+        animation: fadeInUp 0.5s ease-out both;
+      }
+      .category-interactive-card:active {
+        transform: scale(0.95);
+      }
+      .category-interactive-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06) !important;
+      }
+      .category-interactive-card:hover .category-card-img {
+        transform: scale(1.08) rotate(2deg);
+      }
+      
+      /* Image Zoom details in slider */
+      .promo-image-zoom {
+        animation: slowBgZoom 20s infinite alternate ease-in-out;
+      }
+      @keyframes slowBgZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.12); }
+      }
+      
+      /* Shadow depth enhancements */
+      .promo-depth-shadow {
+        box-shadow: 0 8px 24px rgba(23,37,31,0.12), inset 0 0 40px rgba(0,0,0,0.05);
+      }
+      
+      /* Focused Search inputs */
+      .searchInput:focus {
+        border-color: var(--color-primary) !important;
+        box-shadow: 0 4px 12px rgba(0,107,50,0.04), inset 0 1px 3px rgba(0,0,0,0.01) !important;
+      }
+    `;
+    document.head.appendChild(styleSheet);
+  }
+}
 
 export default MobileHome;

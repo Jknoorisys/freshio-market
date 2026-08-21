@@ -7,7 +7,7 @@ export const MobileAppLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [time, setTime] = useState('');
-  
+
   // Format current time as HH:MM
   useEffect(() => {
     const updateTime = () => {
@@ -17,7 +17,7 @@ export const MobileAppLayout = ({ children }) => {
       minutes = minutes < 10 ? '0' + minutes : minutes;
       setTime(`${hours}:${minutes}`);
     };
-    
+
     updateTime();
     const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
@@ -61,7 +61,7 @@ export const MobileAppLayout = ({ children }) => {
           {/* Status Bar */}
           <div style={styles.statusBar} className="mobile-status-bar">
             <span style={styles.timeLabel}>{time || '09:41'}</span>
-            
+
             {/* Dynamic Island Area */}
             <div style={styles.dynamicIsland}>
               <div style={styles.dynamicIslandCamera} />
@@ -153,7 +153,7 @@ const styles = {
     backgroundColor: 'transparent',
     transition: 'all 0.2s',
   },
-  
+
   // Phone Frame styles
   phoneFrame: {
     position: 'relative',
@@ -195,7 +195,7 @@ const styles = {
     backgroundColor: '#1c1c1e',
     borderRadius: '0 4px 4px 0',
   },
-  
+
   // Screen
   phoneScreen: {
     position: 'relative',

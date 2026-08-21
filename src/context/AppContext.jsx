@@ -28,7 +28,7 @@ export const AppProvider = ({ children }) => {
       name: username.charAt(0).toUpperCase() + username.slice(1),
       email: email,
       phone: '+250 788 000 000',
-      avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${username}`,
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
       joinedDate: 'March 2026',
       membership: false, // Freshio+ membership status
     };
@@ -43,7 +43,7 @@ export const AppProvider = ({ children }) => {
       name: name,
       email: email,
       phone: phone || '+250 788 000 000',
-      avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`,
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
       joinedDate: 'August 2026',
       membership: false,
     };
