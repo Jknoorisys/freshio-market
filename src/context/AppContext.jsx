@@ -245,6 +245,12 @@ export const AppProvider = ({ children }) => {
     return orderId;
   };
 
+  const addOrder = (order) => {
+    const updated = [order, ...orders];
+    setOrders(updated);
+    localStorage.setItem('freshio_orders', JSON.stringify(updated));
+  };
+
   // --- TOAST NOTIFICATIONS STATE ---
   const [toasts, setToasts] = useState([]);
 
@@ -334,6 +340,7 @@ export const AppProvider = ({ children }) => {
         getTotal,
         orders,
         placeOrder,
+        addOrder,
         toasts,
         addToast,
         removeToast,

@@ -1018,6 +1018,10 @@ const rawStyles = {
     display: 'flex',
     gap: '16px',
     flexWrap: 'wrap',
+    '@media (max-width: 600px)': {
+      flexDirection: 'column',
+      width: '100%',
+    }
   },
   floatingCard: {
     display: 'flex',
@@ -1029,6 +1033,10 @@ const rawStyles = {
     border: '1px solid var(--color-border)',
     boxShadow: 'var(--shadow-sm)',
     flexGrow: 1,
+    '@media (max-width: 600px)': {
+      width: '100%',
+      justifyContent: 'flex-start',
+    }
   },
   floatingIconCircle: {
     width: '32px',
@@ -1092,57 +1100,80 @@ const rawStyles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '20px',
+    flexWrap: 'nowrap',
+    gap: '12px',
+    '@media (max-width: 1024px)': {
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: '16px 24px',
+    }
   },
   statBox: {
     display: 'flex',
     alignItems: 'center',
-    gap: '14px',
-    flex: '1 1 200px',
+    gap: '10px',
+    flex: '1 1 0px',
+    minWidth: '0',
     justifyContent: 'center',
-    padding: '8px 12px',
+    padding: '8px 4px',
+    '@media (max-width: 1024px)': {
+      flex: '0 0 calc(50% - 16px)',
+      justifyContent: 'flex-start',
+      paddingLeft: '24px',
+    },
+    '@media (max-width: 600px)': {
+      flex: '0 0 100%',
+      justifyContent: 'center',
+      paddingLeft: 0,
+    }
   },
   statIconCircle: {
-    width: '46px',
-    height: '46px',
-    borderRadius: '14px',
+    width: '42px',
+    height: '42px',
+    borderRadius: '12px',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+    flexShrink: 0,
   },
   statTextGroup: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
+    minWidth: '0',
   },
   statNum: {
     display: 'block',
-    fontSize: '32px',
+    fontSize: '26px',
     fontWeight: '900',
     color: 'var(--color-accent)',
     lineHeight: '1.1',
     letterSpacing: '-0.5px',
     textShadow: '0 2px 10px rgba(184, 233, 78, 0.25)',
+    whiteSpace: 'nowrap',
   },
   statLabel: {
     display: 'block',
-    fontSize: '11px',
+    fontSize: '10.5px',
     fontWeight: '700',
     color: 'rgba(255, 255, 255, 0.75)',
     textTransform: 'uppercase',
     marginTop: '4px',
     letterSpacing: '0.5px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',
   },
   statDivider: {
     width: '1px',
     height: '36px',
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
     alignSelf: 'center',
-    '@media (max-width: 768px)': {
+    '@media (max-width: 1024px)': {
       display: 'none',
     },
   },

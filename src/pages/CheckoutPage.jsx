@@ -22,6 +22,7 @@ export const CheckoutPage = () => {
   // Checkout transactional simulation states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [momoStep, setMomoStep] = useState(0); // 0: Idle, 1: Prompt Sent, 2: Accepted
+  const [simulateFailure, setSimulateFailure] = useState(false);
 
   const subtotal = getSubtotal();
   const bulkDiscount = getDiscount();
@@ -65,6 +66,26 @@ export const CheckoutPage = () => {
   };
 
   const completeMockCheckout = () => {
+    if (paymentMethod === 'momo' && simulateFailure) {
+      addToast('MoMo transaction declined/failed.', 'error');
+      setIsSubmitting(false);
+      setMomoStep(0);
+      
+      const failedOrder = {
+        id: `FR-${Math.floor(10000 + Math.random() * 90000)}`,
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        total: finalTotal,
+        status: 'Failed',
+        paymentMethod: 'MTN MoMo',
+        deliverySlot: deliverySlot === 'express' ? 'Express (< 2 Hrs)' : 'Next Day standard',
+        address: `${houseNumber ? `${houseNumber}, ` : ''}${streetAddress}, ${sector}, Kigali`,
+        items: [...cart],
+      };
+      
+      navigate('/order-success', { state: { order: failedOrder, status: 'failed' } });
+      return;
+    }
+
     // Generate mock order object
     const newOrder = {
       id: `FR-${Math.floor(10000 + Math.random() * 90000)}`,
@@ -293,6 +314,15 @@ export const CheckoutPage = () => {
                       />
                     </div>
                     <span style={styles.momoTip}>We will dispatch a secure prompt request to this number automatically.</span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '12.5px', color: 'var(--color-error)', cursor: 'pointer', fontWeight: '700' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={simulateFailure} 
+                        onChange={(e) => setSimulateFailure(e.target.checked)}
+                        style={{ accentColor: 'var(--color-error)' }}
+                      />
+                      <span>Simulate transaction failure (decline/timeout)</span>
+                    </label>
                   </div>
                 )}
               </div>

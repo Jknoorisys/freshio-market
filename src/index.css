@@ -810,3 +810,14 @@ ul, ol {
   }
 }
 
+/* Animated Success Order pop */
+@keyframes successPop {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.15) rotate(15deg); opacity: 0.9; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.animate-success-pop {
+  animation: successPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+

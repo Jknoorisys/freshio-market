@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
-import { Check, Calendar, MapPin, Truck, HelpCircle } from 'lucide-react';
+import { Check, X, Calendar, MapPin, Truck, HelpCircle } from 'lucide-react';
 
 export const OrderSuccess = () => {
   const styles = useResponsiveStyles(rawStyles);
@@ -24,20 +24,43 @@ export const OrderSuccess = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  const isFailed = location.state?.status === 'failed';
+
   return (
     <div style={styles.page}>
       <div className="container" style={styles.cardContainer}>
-        {/* Animated Check Shield */}
-        <div style={styles.successIconShield} className="category-icon-pop">
-          <div style={styles.iconCircle}>
-            <Check size={40} color="#FFFFFF" strokeWidth={3} />
+        {/* Animated Check/X Shield */}
+        <div style={styles.successIconShield} className="animate-success-pop">
+          <div style={{
+            ...styles.iconCircle,
+            backgroundColor: isFailed ? 'var(--color-error)' : 'var(--color-primary)',
+            boxShadow: isFailed ? '0 8px 24px rgba(239, 68, 68, 0.25)' : '0 8px 24px rgba(39, 158, 83, 0.25)'
+          }}>
+            {isFailed ? (
+              <X size={40} color="#FFFFFF" strokeWidth={3} />
+            ) : (
+              <Check size={40} color="#FFFFFF" strokeWidth={3} />
+            )}
           </div>
         </div>
 
-        <span style={styles.successBadge}>TRANSACTION CONFIRMED</span>
-        <h1 style={styles.successTitle}>Thank You for Sourcing!</h1>
+        <span style={{
+          ...styles.successBadge,
+          color: isFailed ? 'var(--color-error)' : 'var(--color-primary)'
+        }}>
+          {isFailed ? 'TRANSACTION DECLINED / FAILED' : 'TRANSACTION CONFIRMED'}
+        </span>
+        
+        <h1 style={styles.successTitle}>
+          {isFailed ? 'Payment Authorization Failed' : 'Thank You for Sourcing!'}
+        </h1>
+        
         <p style={styles.successDesc}>
-          Your order has been received and is being sourced from our local farms. A MoMo transaction receipt has been sent to your phone.
+          {isFailed ? (
+            'We could not authorize your MTN MoMo transaction. Please verify that your MoMo PIN was entered correctly, check your account balance, or try another payment method.'
+          ) : (
+            'Your order has been received and is being sourced from our local farms. A MoMo transaction receipt has been sent to your phone.'
+          )}
         </p>
 
         {/* ORDER DETAILS RECEIPT CARD */}
@@ -54,8 +77,11 @@ export const OrderSuccess = () => {
 
           <div style={styles.receiptRow}>
             <span style={styles.receiptLabel}>Amount Paid</span>
-            <strong style={{ ...styles.receiptValue, color: 'var(--color-primary-dark)' }}>
-              {order.total.toLocaleString()} RWF
+            <strong style={{ 
+              ...styles.receiptValue, 
+              color: isFailed ? 'var(--color-error)' : 'var(--color-primary-dark)' 
+            }}>
+              {isFailed ? 'Declined / Cancelled' : `${order.total.toLocaleString()} RWF`}
             </strong>
           </div>
 
@@ -80,56 +106,68 @@ export const OrderSuccess = () => {
           </div>
         </div>
 
-        {/* ORDER TIMELINE TRACKER */}
-        <div style={styles.trackerBlock}>
-          <h3 style={styles.trackerTitle}>Delivery Progress</h3>
-          <div style={styles.timeline}>
-            <div style={styles.timelineStep}>
-              <div style={{ ...styles.stepDot, backgroundColor: 'var(--color-primary)' }}>
-                <Check size={10} color="#FFFFFF" />
+        {/* ORDER TIMELINE TRACKER - Hide if Failed */}
+        {!isFailed && (
+          <div style={styles.trackerBlock}>
+            <h3 style={styles.trackerTitle}>Delivery Progress</h3>
+            <div style={styles.timeline}>
+              <div style={styles.timelineStep}>
+                <div style={{ ...styles.stepDot, backgroundColor: 'var(--color-primary)' }}>
+                  <Check size={10} color="#FFFFFF" />
+                </div>
+                <div style={styles.stepContent}>
+                  <span style={{ ...styles.stepName, fontWeight: '800', color: 'var(--color-text)' }}>Order Placed</span>
+                  <span style={styles.stepDesc}>We have received your payment check</span>
+                </div>
               </div>
-              <div style={styles.stepContent}>
-                <span style={{ ...styles.stepName, fontWeight: '800', color: 'var(--color-text)' }}>Order Placed</span>
-                <span style={styles.stepDesc}>We have received your payment check</span>
-              </div>
-            </div>
 
-            <div style={styles.timelineStep}>
-              <div style={{ ...styles.stepDot, backgroundColor: 'var(--color-primary)' }}>
-                <div style={styles.pulseInner}></div>
+              <div style={styles.timelineStep}>
+                <div style={{ ...styles.stepDot, backgroundColor: 'var(--color-primary)' }}>
+                  <div style={styles.pulseInner}></div>
+                </div>
+                <div style={styles.stepContent}>
+                  <span style={{ ...styles.stepName, fontWeight: '800', color: 'var(--color-text)' }}>Sourcing Fresh Produce</span>
+                  <span style={styles.stepDesc}>Shoppers are packing items from cold counters</span>
+                </div>
               </div>
-              <div style={styles.stepContent}>
-                <span style={{ ...styles.stepName, fontWeight: '800', color: 'var(--color-text)' }}>Sourcing Fresh Produce</span>
-                <span style={styles.stepDesc}>Shoppers are packing items from cold counters</span>
-              </div>
-            </div>
 
-            <div style={styles.timelineStep}>
-              <div style={styles.stepDot}></div>
-              <div style={styles.stepContent}>
-                <span style={styles.stepName}>Out for Delivery</span>
-                <span style={styles.stepDesc}>Express rider dispatching to your sector</span>
+              <div style={styles.timelineStep}>
+                <div style={styles.stepDot}></div>
+                <div style={styles.stepContent}>
+                  <span style={styles.stepName}>Out for Delivery</span>
+                  <span style={styles.stepDesc}>Express rider dispatching to your sector</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Redirect Action CTAs */}
         <div style={styles.actions}>
-          <button 
-            onClick={() => navigate('/account')} 
-            className="btn btn-primary"
-            style={styles.historyBtn}
-          >
-            Track Order In History
-          </button>
+          {isFailed ? (
+            <button 
+              onClick={() => navigate('/checkout')} 
+              className="btn btn-primary"
+              style={{ ...styles.historyBtn, backgroundColor: 'var(--color-primary)' }}
+            >
+              Modify &amp; Retry Checkout
+            </button>
+          ) : (
+            <button 
+              onClick={() => navigate('/account')} 
+              className="btn btn-primary"
+              style={styles.historyBtn}
+            >
+              Track Order In History
+            </button>
+          )}
           
           <button 
             onClick={() => navigate('/')} 
             className="btn btn-outline"
             style={styles.homeBtn}
           >
-            Continue Shopping
+            {isFailed ? 'Return to Homepage' : 'Continue Shopping'}
           </button>
         </div>
 
