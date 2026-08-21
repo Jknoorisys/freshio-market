@@ -767,8 +767,35 @@ ul, ol {
   box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
+/* Premium Dashboard Widgets styling */
+.premium-widget-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03) !important;
+}
+.premium-widget-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 24px rgba(22, 58, 53, 0.08) !important;
+  border-color: var(--color-primary-dark) !important;
+}
+.premium-widget-card .widgetImgCovered {
+  transition: transform 0.4s ease;
+}
+.premium-widget-card:hover .widgetImgCovered {
+  transform: scale(1.05);
+}
 
 
 
 
 
+
+
+/* Dashboard Promo Cards – 3-column widget row */
+.dashboard-promo-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(22, 58, 53, 0.10) !important;
+}
+.dashboard-promo-card button:hover,
+.dashboard-promo-card a:hover {
+  filter: brightness(1.08);
+}

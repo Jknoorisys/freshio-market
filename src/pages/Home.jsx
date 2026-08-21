@@ -470,108 +470,117 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* SECTION 8 - 3 WIDGET CARDS */}
-      <section style={{ margin: '24px 0' }}>
+      {/* SECTION 8 - 3 DASHBOARD PROMO CARDS */}
+      <section style={{ margin: '24px 0 8px 0' }}>
         <div className="container">
           <div style={styles.widgetRow}>
 
-            {/* BUY AGAIN */}
-            <div style={{ ...styles.widgetCard, backgroundColor: '#F0FDF4', borderColor: '#DCFCE7' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={styles.widgetTitle}>Buy again</h3>
-                  <p style={styles.widgetDesc}>Reorder your last items in one click.</p>
-                  <button onClick={() => navigate('/orders')} className="btn btn-primary" style={{ ...styles.widgetBtn, backgroundColor: '#163A35', color: '#FFFFFF', border: 'none', padding: '8px 18px', fontSize: '13px', fontWeight: '700', borderRadius: '10px' }}>Reorder All</button>
+            {/* ── CARD 1: BUY AGAIN ── */}
+            <div style={styles.buyAgainCard} className="dashboard-promo-card">
+              {/* Left: Text + Button + Product Chips */}
+              <div style={styles.buyAgainLeft}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                  <h3 style={styles.buyAgainTitle}>Buy again</h3>
+                  <p style={styles.buyAgainDesc}>Reorder your last items in one click.</p>
+                  <button onClick={() => navigate('/orders')} style={styles.buyAgainBtn}>
+                    Reorder All
+                  </button>
                 </div>
+                {/* Small product chips at the bottom */}
                 <div style={styles.miniProductRow}>
                   {[
-                    'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=100&q=80',
-                    'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=100&q=80',
-                    'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=100&q=80',
-                    'https://images.unsplash.com/photo-1587486913049-53fc88980cfc?auto=format&fit=crop&w=100&q=80'
-                  ].map((url, i) => (
-                    <div key={i} style={styles.miniProductChip}>
-                      <img src={url} alt="product" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    { url: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=80&q=80', alt: 'Cooking oil' },
+                    { url: 'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?auto=format&fit=crop&w=80&q=80', alt: 'Flour bag' },
+                    { url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=80&q=80', alt: 'Bread loaf' },
+                    { url: 'https://images.unsplash.com/photo-1587486913049-53fc88980cfc?auto=format&fit=crop&w=80&q=80', alt: 'Fresh eggs' },
+                  ].map((item, i) => (
+                    <div key={i} style={styles.miniChip}>
+                      <img src={item.url} alt={item.alt} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} onError={(e) => { e.target.style.display='none'; }} />
                     </div>
                   ))}
                 </div>
               </div>
-              <div style={styles.widgetImgRight}>
-                <img
-                  src="https://images.unsplash.com/photo-1607349913338-fca6f7fc42d0?auto=format&fit=crop&w=500&q=80"
-                  alt="Grocery basket"
-                  style={styles.widgetImg}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+              {/* Right: basket.png overflowing bottom edge */}
+              <div style={styles.buyAgainImgWrap}>
+                <img src="/basket.png" alt="Fresh grocery basket" style={styles.buyAgainImg} />
               </div>
             </div>
 
-            {/* FRESHIO REWARDS */}
-            <div style={{ ...styles.widgetCard, backgroundColor: '#FEFCE8', border: '1.5px solid #FDE68A' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={styles.rewardsLabel}>freshio <span style={{ color: '#D97706' }}>rewards</span></div>
-                  <p style={{ fontSize: '12.5px', color: '#78716C', margin: '4px 0 8px', lineHeight: '1.4' }}>Earn points with every order and enjoy exciting benefits.</p>
+            {/* ── CARD 2: FRESHIO REWARDS ── */}
+            <div style={styles.rewardsCard} className="dashboard-promo-card">
+              {/* Left: Text + Points + Button */}
+              <div style={styles.rewardsLeft}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                  <div style={styles.rewardsTitleRow}>
+                    <span style={styles.rewardsTitleItalic}>freshio</span>
+                    <span style={styles.rewardsTitleBold}>rewards</span>
+                  </div>
+                  <p style={styles.rewardsCardDesc}>Earn points with every order and enjoy exciting benefits.</p>
                 </div>
-                <div>
-                  <p style={{ fontSize: '11px', color: '#92400E', fontWeight: '700', margin: '0 0 2px' }}>You have</p>
-                  <div style={styles.rewardsPts}>1,240 <span style={{ fontSize: '18px', fontWeight: '800' }}>pts</span></div>
-                  <button onClick={() => navigate('/account')} style={styles.rewardsBtn}>View Rewards</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                  <span style={styles.rewardsYouHave}>You have</span>
+                  <div style={styles.rewardsPtsLarge}>1,240 <span style={styles.rewardsPtsSuffix}>pts</span></div>
+                  <button onClick={() => navigate('/account')} style={styles.rewardsViewBtn}>
+                    View Rewards
+                  </button>
                 </div>
               </div>
-              <div style={styles.widgetImgRight}>
-                <img
-                  src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=300&q=80"
-                  alt="Gift box rewards"
-                  style={{ ...styles.widgetImg, objectPosition: 'center' }}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+              {/* Right: gift.png - large, bottom-anchored */}
+              <div style={styles.rewardsImgWrap}>
+                <img src="/gift.png" alt="Gold gift box rewards" style={styles.rewardsImg} />
               </div>
             </div>
 
-            {/* NEED HELP */}
-            <div style={{ ...styles.widgetCard, backgroundColor: '#F5F3FF', borderColor: '#DDD6FE' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={styles.widgetTitle}>Need help?</h3>
-                  <p style={styles.widgetDesc}>Chat with us on WhatsApp we're here for you!</p>
+            {/* ── CARD 3: NEED HELP ── */}
+            <div style={styles.helpCard} className="dashboard-promo-card">
+              {/* Left: Text + Chat Button */}
+              <div style={styles.helpLeft}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                  <h3 style={styles.helpTitle}>Need help?</h3>
+                  <p style={styles.helpDesc}>Chat with us on WhatsApp we're here for you!</p>
                 </div>
-                <div>
-                  <a
-                    href="https://wa.me/250788000000"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="chat-now-btn-lavender"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      backgroundColor: '#FFFFFF',
-                      border: '1.5px solid #7C3AED',
-                      borderRadius: '9999px',
-                      padding: '8px 18px',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      color: '#7C3AED',
-                      textDecoration: 'none',
-                      transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 6px rgba(124, 58, 237, 0.08)'
-                    }}
-                  >
-                    Chat now
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style={{ color: 'inherit' }}>
-                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.45L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.863-9.858.002-2.634-1.02-5.11-2.881-6.974-1.862-1.863-4.337-2.886-6.977-2.887-5.438 0-9.86 4.417-9.863 9.858-.001 1.76.475 3.479 1.38 5.025l-.963 3.518 3.619-.949zm9.857-7.25c-.29-.145-1.716-.848-1.982-.945-.267-.097-.461-.146-.656.145-.194.29-.752.946-.922 1.14-.17.193-.34.217-.63.072-.29-.145-1.224-.45-2.33-1.44-.86-.768-1.44-1.716-1.609-2.007-.17-.29-.018-.447.127-.591.13-.13.29-.34.435-.508.145-.169.194-.29.29-.483.097-.193.048-.361-.024-.507-.072-.145-.656-1.58-.9-2.17-.236-.575-.478-.497-.656-.506-.17-.008-.364-.01-.559-.01-.195 0-.511.072-.779.362-.267.29-1.02.999-1.02 2.437 0 1.438 1.047 2.827 1.192 3.023.146.195 2.062 3.149 4.993 4.414.697.301 1.24.481 1.662.615.701.223 1.34.191 1.844.116.562-.083 1.716-.701 1.96-1.378.243-.676.243-1.256.17-1.377-.072-.121-.267-.193-.559-.34z" />
-                    </svg>
-                  </a>
-                </div>
+                <a
+                  href="https://wa.me/250788316000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.chatBtn}
+                >
+                  Chat now
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ flexShrink: 0 }}>
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.45L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.863-9.858.002-2.634-1.02-5.11-2.881-6.974-1.862-1.863-4.337-2.886-6.977-2.887-5.438 0-9.86 4.417-9.863 9.858-.001 1.76.475 3.479 1.38 5.025l-.963 3.518 3.619-.949zm9.857-7.25c-.29-.145-1.716-.848-1.982-.945-.267-.097-.461-.146-.656.145-.194.29-.752.946-.922 1.14-.17.193-.34.217-.63.072-.29-.145-1.224-.45-2.33-1.44-.86-.768-1.44-1.716-1.609-2.007-.17-.29-.018-.447.127-.591.13-.13.29-.34.435-.508.145-.169.194-.29.29-.483.097-.193.048-.361-.024-.507-.072-.145-.656-1.58-.9-2.17-.236-.575-.478-.497-.656-.506-.17-.008-.364-.01-.559-.01-.195 0-.511.072-.779.362-.267.29-1.02.999-1.02 2.437 0 1.438 1.047 2.827 1.192 3.023.146.195 2.062 3.149 4.993 4.414.697.301 1.24.481 1.662.615.701.223 1.34.191 1.844.116.562-.083 1.716-.701 1.96-1.378.243-.676.243-1.256.17-1.377-.072-.121-.267-.193-.559-.34z" />
+                  </svg>
+                </a>
               </div>
-              <div style={styles.widgetImgRight}>
-                <img
-                  src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=300&q=80"
-                  alt="Freshio app"
-                  style={{ ...styles.widgetImg, objectFit: 'contain', backgroundColor: 'transparent' }}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+
+              {/* Right: Phone mockup showing Freshio Market WhatsApp chat */}
+              <div style={styles.helpPhoneWrap}>
+                <div style={styles.phoneMockup}>
+                  {/* Phone header bar */}
+                  <div style={styles.phoneMockupHeader}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={styles.phoneMockupAvatar}>F</div>
+                      <div>
+                        <div style={styles.phoneMockupName}>Freshio Market</div>
+                        <div style={styles.phoneMockupStatus}>online</div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Chat area */}
+                  <div style={styles.phoneMockupChat}>
+                    {/* Agent message */}
+                    <div style={styles.chatMsgAgent}>
+                      <span style={styles.chatAgentHi}>Hi there! 👋</span>
+                      <span style={styles.chatAgentText}>How can we help you today?</span>
+                    </div>
+                    {/* Menu items */}
+                    {['Track my order', 'Check product availability', 'Branch information'].map((item, i) => (
+                      <div key={i} style={styles.chatMenuChip}>
+                        <span style={{ color: '#279E53', marginRight: '6px', fontSize: '13px' }}>✓</span>
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1615,7 +1624,7 @@ const styles = {
   widgetRow: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '16px',
+    gap: '20px',
     alignItems: 'stretch',
   },
   widgetCard: {
@@ -1630,6 +1639,326 @@ const styles = {
     position: 'relative',
     minHeight: '170px',
   },
+
+  // BUY AGAIN CARD
+  buyAgainCard: {
+    backgroundColor: '#EFF8F0',
+    border: '1.5px solid #C8E6C9',
+    borderRadius: '20px',
+    padding: '18px 20px 16px 20px',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    overflow: 'hidden',
+    position: 'relative',
+    minHeight: '175px',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  },
+  buyAgainLeft: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    paddingRight: '115px', // space for absolute image
+    zIndex: 2,
+  },
+  buyAgainTitle: {
+    fontSize: '22px',
+    fontWeight: '900',
+    color: '#163A35',
+    margin: '0 0 4px 0',
+    letterSpacing: '-0.3px',
+  },
+  buyAgainDesc: {
+    fontSize: '12px',
+    color: '#47635C',
+    lineHeight: '1.4',
+    margin: '0 0 10px 0',
+  },
+  buyAgainBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: '#163A35',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '8px 16px',
+    fontSize: '12.5px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    width: 'fit-content',
+    transition: 'background-color 0.2s ease',
+  },
+  buyAgainImgWrap: {
+    width: '150px',
+    height: '150px',
+    position: 'absolute',
+    right: '-5px',
+    bottom: '-5px',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  buyAgainImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.12))',
+  },
+  miniChip: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    border: '2px solid rgba(255,255,255,0.95)',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+    flexShrink: 0,
+    backgroundColor: '#FFFFFF',
+  },
+
+  // REWARDS CARD
+  rewardsCard: {
+    backgroundColor: '#FFFBEB',
+    border: '1.5px solid #FDE68A',
+    borderRadius: '20px',
+    padding: '18px 20px 16px 20px',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    overflow: 'hidden',
+    position: 'relative',
+    minHeight: '175px',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  },
+  rewardsLeft: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    paddingRight: '105px', // space for absolute image
+    zIndex: 2,
+  },
+  rewardsTitleRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '2px',
+    marginBottom: '4px',
+  },
+  rewardsTitleItalic: {
+    fontSize: '20px',
+    fontWeight: '800',
+    fontStyle: 'italic',
+    color: '#163A35', // dark green brand color
+    letterSpacing: '-0.5px',
+  },
+  rewardsTitleBold: {
+    fontSize: '20px',
+    fontWeight: '900',
+    fontStyle: 'italic',
+    color: '#F59E0B', // gold rewards color
+    letterSpacing: '-0.5px',
+  },
+  rewardsCardDesc: {
+    fontSize: '12px',
+    color: '#78716C',
+    lineHeight: '1.4',
+    margin: '0 0 6px 0',
+  },
+  rewardsYouHave: {
+    fontSize: '11px',
+    fontWeight: '800',
+    color: '#92400E',
+    display: 'block',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px',
+  },
+  rewardsPtsLarge: {
+    fontSize: '34px',
+    fontWeight: '900',
+    color: '#78350F',
+    lineHeight: '1.05',
+    margin: '0px 0 10px 0',
+  },
+  rewardsPtsSuffix: {
+    fontSize: '18px',
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  rewardsViewBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: '#F59E0B',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '8px 16px',
+    fontSize: '12.5px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    width: 'fit-content',
+    transition: 'background-color 0.2s ease',
+    boxShadow: '0 4px 10px rgba(245,158,11,0.25)',
+  },
+  rewardsImgWrap: {
+    width: '130px',
+    height: '130px',
+    position: 'absolute',
+    right: '-5px',
+    bottom: '-5px',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rewardsImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 8px 16px rgba(245,158,11,0.22))',
+  },
+
+  // HELP CARD
+  helpCard: {
+    backgroundColor: '#FAFAFF',
+    border: '1.5px solid #E2E0F0',
+    borderRadius: '20px',
+    padding: '18px 20px 16px 20px',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    overflow: 'hidden',
+    position: 'relative',
+    minHeight: '175px',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  },
+  helpLeft: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    paddingRight: '115px', // space for absolute phone mockup
+    zIndex: 2,
+  },
+  helpTitle: {
+    fontSize: '22px',
+    fontWeight: '900',
+    color: '#1E1B4B',
+    margin: '0 0 4px 0',
+    letterSpacing: '-0.3px',
+  },
+  helpDesc: {
+    fontSize: '12px',
+    color: '#6B7280',
+    lineHeight: '1.4',
+    margin: '0 0 10px 0',
+  },
+  chatBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    backgroundColor: '#FFFFFF',
+    color: '#374151',
+    border: '1.5px solid #D1D5DB',
+    borderRadius: '9999px',
+    padding: '7px 16px',
+    fontSize: '12.5px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    textDecoration: 'none',
+    width: 'fit-content',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+  },
+  helpPhoneWrap: {
+    width: '136px',
+    position: 'absolute',
+    right: '8px',
+    bottom: '-10px',
+    height: '180px',
+    zIndex: 1,
+    display: 'flex',
+    alignItems: 'flex-end',
+  },
+  phoneMockup: {
+    width: '136px',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '14px 14px 0 0',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+    overflow: 'hidden',
+    border: '1.5px solid #E5E7EB',
+    borderBottom: 'none',
+  },
+  phoneMockupHeader: {
+    backgroundColor: '#279E53',
+    padding: '8px 10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  phoneMockupAvatar: {
+    width: '26px',
+    height: '26px',
+    borderRadius: '50%',
+    backgroundColor: '#FFFFFF',
+    color: '#279E53',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '900',
+    fontSize: '12px',
+    flexShrink: 0,
+  },
+  phoneMockupName: {
+    fontSize: '11px',
+    fontWeight: '800',
+    color: '#FFFFFF',
+    lineHeight: 1.2,
+  },
+  phoneMockupStatus: {
+    fontSize: '9px',
+    color: 'rgba(255,255,255,0.8)',
+  },
+  phoneMockupChat: {
+    padding: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    backgroundColor: '#F0F4F3',
+  },
+  chatMsgAgent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '10px 10px 10px 2px',
+    padding: '7px 9px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+  },
+  chatAgentHi: {
+    fontSize: '10px',
+    fontWeight: '800',
+    color: '#163A35',
+  },
+  chatAgentText: {
+    fontSize: '9.5px',
+    color: '#6B7280',
+    lineHeight: '1.35',
+  },
+  chatMenuChip: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    padding: '5px 8px',
+    fontSize: '9.5px',
+    fontWeight: '600',
+    color: '#374151',
+    display: 'flex',
+    alignItems: 'center',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+  },
+
   widgetTitle: {
     fontSize: '16px',
     fontWeight: '800',
@@ -1650,8 +1979,8 @@ const styles = {
   },
   miniProductRow: {
     display: 'flex',
-    gap: '8px',
-    marginTop: '12px',
+    gap: '6px',
+    marginTop: '10px',
   },
   miniProductChip: {
     width: '36px',
@@ -1665,18 +1994,20 @@ const styles = {
     overflow: 'hidden',
     boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
   },
-  widgetImgRight: {
+  widgetImgWrapper: {
     width: '110px',
+    height: '110px',
     flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    alignSelf: 'center',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+    border: '1.5px solid rgba(255,255,255,0.5)',
   },
-  widgetImg: {
+  widgetImgCovered: {
     width: '100%',
-    height: 'auto',
-    maxHeight: '120px',
-    objectFit: 'contain',
+    height: '100%',
+    objectFit: 'cover',
   },
   rewardsLabel: {
     fontSize: '16px',
