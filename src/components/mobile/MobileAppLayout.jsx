@@ -1,30 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Wifi, Battery, Signal } from 'lucide-react';
 import { MobileTabNav } from './MobileTabNav';
 
 export const MobileAppLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [time, setTime] = useState('');
 
-  // Format current time as HH:MM
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      let hours = now.getHours();
-      let minutes = now.getMinutes();
-      minutes = minutes < 10 ? '0' + minutes : minutes;
-      setTime(`${hours}:${minutes}`);
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Determine if we should show the bottom tab navigation.
-  // We only show it on main mobile pages: /mobile, /mobile/shop, /mobile/wishlist, /mobile/account
+  // Show bottom tab navigation only on main mobile pages
   const showTabNav = [
     '/mobile',
     '/mobile/',
@@ -35,12 +17,13 @@ export const MobileAppLayout = ({ children }) => {
 
   return (
     <div style={styles.outerContainer} className="mobile-outer-container">
-      {/* Desktop side panel helper to quickly switch or see info */}
+
+      {/* Desktop side panel – only visible on wide screens */}
       <div style={styles.desktopInfoPanel} className="mobile-desktop-panel">
         <div style={styles.badge}>MOBILE APP MODE</div>
         <h2 style={styles.panelTitle}>Freshio Mobile</h2>
         <p style={styles.panelDesc}>
-          You are viewing the simulated mobile app version of Freshio. On screens under 768px wide, this frame automatically melts away for a native mobile experience.
+          You're viewing the mobile app version of Freshio. On a real phone this opens fullscreen as a native app — no browser bar, no frame.
         </p>
         <div style={styles.linkList}>
           <button onClick={() => navigate('/')} style={styles.linkBtnOutline}>
@@ -49,46 +32,17 @@ export const MobileAppLayout = ({ children }) => {
         </div>
       </div>
 
-      {/* Phone Mockup Frame Container */}
+      {/* Phone screen wrapper – looks like a frame on desktop, fills screen on phone */}
       <div style={styles.phoneFrame} className="mobile-phone-frame">
-        {/* Physical buttons on the mockup */}
-        <div style={styles.volumeUp} />
-        <div style={styles.volumeDown} />
-        <div style={styles.powerBtn} />
-
-        {/* Inner Phone Screen */}
-        <div style={styles.phoneScreen} className="mobile-phone-screen">
-          {/* Status Bar */}
-          <div style={styles.statusBar} className="mobile-status-bar">
-            <span style={styles.timeLabel}>{time || '09:41'}</span>
-
-            {/* Dynamic Island Area */}
-            <div style={styles.dynamicIsland}>
-              <div style={styles.dynamicIslandCamera} />
-            </div>
-
-            <div style={styles.statusIcons}>
-              <Signal size={12} strokeWidth={2.5} />
-              <Wifi size={12} strokeWidth={2.5} />
-              <Battery size={16} strokeWidth={2.5} style={styles.batteryIcon} />
-            </div>
-          </div>
-
-          {/* Scrollable Viewport / Content */}
-          <div style={{
-            ...styles.viewportContent,
-            paddingBottom: showTabNav ? '80px' : '0px'
-          }}>
-            {children}
-          </div>
-
-          {/* Mobile Bottom Tab Navigation */}
-          {showTabNav && <MobileTabNav />}
-
-          {/* Physical Home Indicator */}
-          <div style={styles.homeIndicator} className="mobile-home-indicator" />
+        {/* Scrollable App Content */}
+        <div className="mobile-viewport" style={styles.viewportContent}>
+          {children}
         </div>
+
+        {/* Bottom Tab Bar – natural flex footer, no absolute positioning */}
+        {showTabNav && <MobileTabNav />}
       </div>
+
     </div>
   );
 };
@@ -106,6 +60,7 @@ const styles = {
     gap: '60px',
     overflow: 'auto',
   },
+
   desktopInfoPanel: {
     display: 'flex',
     flexDirection: 'column',
@@ -154,138 +109,37 @@ const styles = {
     transition: 'all 0.2s',
   },
 
-  // Phone Frame styles
+  // Desktop: looks like a phone frame; Mobile: fills the full screen
   phoneFrame: {
     position: 'relative',
     width: '390px',
     height: '844px',
-    borderRadius: '50px',
-    backgroundColor: '#000000',
-    padding: '12px', // Bezel thickness
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+    borderRadius: '44px',
+    backgroundColor: 'var(--color-bg)',
+    boxShadow: '0 30px 60px -12px rgba(0,0,0,0.35), 0 0 0 8px #111, 0 0 0 10px #333',
     flexShrink: 0,
     boxSizing: 'border-box',
-    border: '4px solid #333333',
-  },
-  // Physical buttons
-  volumeUp: {
-    position: 'absolute',
-    left: '-6px',
-    top: '180px',
-    width: '6px',
-    height: '60px',
-    backgroundColor: '#1c1c1e',
-    borderRadius: '4px 0 0 4px',
-  },
-  volumeDown: {
-    position: 'absolute',
-    left: '-6px',
-    top: '255px',
-    width: '6px',
-    height: '60px',
-    backgroundColor: '#1c1c1e',
-    borderRadius: '4px 0 0 4px',
-  },
-  powerBtn: {
-    position: 'absolute',
-    right: '-6px',
-    top: '215px',
-    width: '6px',
-    height: '80px',
-    backgroundColor: '#1c1c1e',
-    borderRadius: '0 4px 4px 0',
-  },
-
-  // Screen
-  phoneScreen: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'var(--color-bg)',
-    borderRadius: '38px',
     overflow: 'hidden',
     display: 'flex',
-    flexDirection: 'column',
-    boxSizing: 'border-box',
-    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.1)',
+    flexDirection: 'column',  // children stack vertically: viewport grows, tab nav stays fixed
   },
-  statusBar: {
-    height: '44px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 24px',
-    backgroundColor: 'var(--color-bg)',
-    color: 'var(--color-text)',
-    fontSize: '13px',
-    fontWeight: '600',
-    zIndex: 1001,
-    position: 'relative',
-    userSelect: 'none',
-  },
-  timeLabel: {
-    width: '40px',
-    textAlign: 'left',
-  },
-  dynamicIsland: {
-    width: '100px',
-    height: '26px',
-    backgroundColor: '#000000',
-    borderRadius: '100px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    top: '8px',
-  },
-  dynamicIslandCamera: {
-    width: '10px',
-    height: '10px',
-    borderRadius: '50%',
-    backgroundColor: '#0c0f24',
-    border: '1px solid #1a1a2e',
-  },
-  statusIcons: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    width: '50px',
-    justifyContent: 'flex-end',
-  },
-  batteryIcon: {
-    transform: 'rotate(0deg)',
-    marginLeft: '2px',
-  },
+
   viewportContent: {
-    flexGrow: 1,
+    flex: 1,               // fills all remaining space above the tab bar
+    minHeight: 0,          // allows flex child to shrink properly
     overflowY: 'auto',
+    overflowX: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
     backgroundColor: 'var(--color-bg)',
     width: '100%',
-    height: 'calc(100% - 44px)',
     boxSizing: 'border-box',
+    WebkitOverflowScrolling: 'touch',
   },
-  homeIndicator: {
-    position: 'absolute',
-    bottom: '8px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '134px',
-    height: '5px',
-    backgroundColor: '#000000',
-    borderRadius: '100px',
-    zIndex: 1000,
-    opacity: 0.5,
-    pointerEvents: 'none',
-  }
 };
 
-// Insert CSS for responsive phone frame styling
+// Responsive CSS: on real phones — fill the screen, no fake frame, use dynamic viewport height
 if (typeof document !== 'undefined') {
   const styleId = 'mobile-layout-styles';
   if (!document.getElementById(styleId)) {
@@ -293,30 +147,42 @@ if (typeof document !== 'undefined') {
     styleSheet.id = styleId;
     styleSheet.textContent = `
       @media (max-width: 768px) {
+        /* Outer wrapper: plain white background, no padding */
         .mobile-outer-container {
           padding: 0 !important;
           background: var(--color-bg) !important;
           gap: 0 !important;
+          min-height: 100dvh !important;
+          align-items: stretch !important;
         }
+        /* Hide desktop side panel on phones */
         .mobile-desktop-panel {
           display: none !important;
         }
+        /* Phone frame becomes the full screen */
         .mobile-phone-frame {
           width: 100vw !important;
-          height: 100vh !important;
-          max-height: 100vh !important;
+          height: 100dvh !important;
+          max-height: 100dvh !important;
           border-radius: 0 !important;
           border: none !important;
-          padding: 0 !important;
           box-shadow: none !important;
+          flex: 1 !important;
         }
-        .mobile-phone-screen {
-          border-radius: 0 !important;
-          height: 100vh !important;
+        /* Viewport scrolls within the real phone's safe area */
+        .mobile-viewport {
+          height: calc(100dvh - 80px) !important;
+          max-height: calc(100dvh - 80px) !important;
         }
-        .mobile-home-indicator {
-          display: none !important;
-        }
+      }
+
+      /* Scrollbar hide for the viewport */
+      .mobile-viewport::-webkit-scrollbar {
+        display: none;
+      }
+      .mobile-viewport {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
     `;
     document.head.appendChild(styleSheet);

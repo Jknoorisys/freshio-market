@@ -7,9 +7,7 @@ export const MobileTabNav = () => {
   const location = useLocation();
   const { cart } = useApp();
 
-  const getCartCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
+  const getCartCount = () => cart.reduce((total, item) => total + item.quantity, 0);
 
   const isActive = (path) => {
     if (path === '/mobile') {
@@ -18,117 +16,104 @@ export const MobileTabNav = () => {
     return location.pathname === path;
   };
 
+  const tabs = [
+    { path: '/mobile',         icon: 'home',            label: 'Home' },
+    { path: '/mobile/shop',    icon: 'grid_view',       label: 'Shop' },
+    { path: '/mobile/cart',    icon: 'shopping_basket', label: 'Cart',    badge: getCartCount() },
+    { path: '/mobile/wishlist',icon: 'favorite',        label: 'Saved' },
+    { path: '/mobile/account', icon: 'person',          label: 'Profile' },
+  ];
+
   return (
-    <nav style={styles.navBar} className="mobile-app-bottom-nav">
-      <div style={styles.navContent}>
-        <button
-          onClick={() => navigate('/mobile')}
-          style={{
-            ...styles.navItem,
-            color: isActive('/mobile') ? '#006b32' : '#3e4a3f',
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>home</span>
-          <span style={styles.navLabel}>Home</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/mobile/shop')}
-          style={{
-            ...styles.navItem,
-            color: isActive('/mobile/shop') || location.pathname.startsWith('/mobile/category') ? '#006b32' : '#3e4a3f',
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>grid_view</span>
-          <span style={styles.navLabel}>Categories</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/mobile/cart')}
-          style={{
-            ...styles.navItem,
-            color: isActive('/mobile/cart') ? '#006b32' : '#3e4a3f',
-          }}
-        >
-          <div style={{ position: 'relative', display: 'inline-flex' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>shopping_basket</span>
-            {getCartCount() > 0 && (
-              <span style={styles.badgeCount}>{getCartCount()}</span>
-            )}
-          </div>
-          <span style={styles.navLabel}>Cart</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/mobile/account')}
-          style={{
-            ...styles.navItem,
-            color: isActive('/mobile/account') ? '#006b32' : '#3e4a3f',
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>person</span>
-          <span style={styles.navLabel}>Profile</span>
-        </button>
-      </div>
+    <nav style={styles.navBar}>
+      {tabs.map((tab) => {
+        const active = isActive(tab.path) ||
+          (tab.path === '/mobile/shop' && location.pathname.startsWith('/mobile/category'));
+        return (
+          <button
+            key={tab.path}
+            onClick={() => navigate(tab.path)}
+            style={{ ...styles.navItem, color: active ? '#2D9B51' : '#8a9a8b' }}
+          >
+            <div style={{ position: 'relative' }}>
+              <span className="material-symbols-outlined" style={{
+                fontSize: '24px',
+                fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0",
+              }}>
+                {tab.icon}
+              </span>
+              {tab.badge > 0 && (
+                <span style={styles.badge}>{tab.badge}</span>
+              )}
+            </div>
+            <span style={{ ...styles.navLabel, fontWeight: active ? '800' : '600' }}>
+              {tab.label}
+            </span>
+            {active && <div style={styles.activeDot} />}
+          </button>
+        );
+      })}
     </nav>
   );
 };
 
 const styles = {
   navBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    backdropFilter: 'blur(24px)',
-    borderTop: 'none',
-    boxShadow: '0 -1px 12px rgba(0, 0, 0, 0.05)',
-    height: '80px',
-    borderRadius: '24px 24px 0 0', // rounded-t-[24px]
-    zIndex: 999,
-    paddingBottom: 'env(safe-area-inset-bottom)',
-    boxSizing: 'border-box',
-  },
-  navContent: {
     display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    height: '100%',
-    width: '100%',
-    padding: '0 16px',
+    height: '60px',
+    flexShrink: 0,
+    backgroundColor: '#FFFFFF',
+    borderTop: '1px solid rgba(0,0,0,0.07)',
+    boxShadow: '0 -2px 16px rgba(0,0,0,0.06)',
+    zIndex: 999,
     boxSizing: 'border-box',
+    paddingBottom: 'env(safe-area-inset-bottom)',
   },
   navItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '4px',
+    gap: '2px',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    width: '64px',
-    height: '64px',
-    transition: 'color 0.2s',
+    flex: 1,
+    height: '100%',
+    position: 'relative',
+    transition: 'color 0.15s ease',
+    padding: 0,
   },
   navLabel: {
-    fontSize: '11px',
-    fontWeight: '700',
+    fontSize: '10px',
+    lineHeight: 1,
   },
-  badgeCount: {
+  badge: {
     position: 'absolute',
-    top: '-6px',
+    top: '-5px',
     right: '-8px',
-    backgroundColor: '#FF5A5F', // error-red
-    color: '#FFFFFF',
+    backgroundColor: '#FF5A5F',
+    color: '#FFF',
     fontSize: '9px',
     fontWeight: '800',
-    padding: '2px 5px',
+    padding: '2px 4px',
     borderRadius: '10px',
-    minWidth: '12px',
+    minWidth: '14px',
     textAlign: 'center',
-    border: '1.5px solid #FFFFFF',
+    border: '1.5px solid #FFF',
+  },
+  activeDot: {
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '20px',
+    height: '3px',
+    backgroundColor: '#2D9B51',
+    borderRadius: '0 0 4px 4px',
   },
 };
 

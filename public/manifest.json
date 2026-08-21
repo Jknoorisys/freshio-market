@@ -1,0 +1,44 @@
+{
+  "name": "Freshio Market",
+  "short_name": "Freshio",
+  "description": "Kigali's Fresh Choice – Shop 4,600+ Sawa Citi groceries delivered to your door in 2 hours.",
+  "start_url": "/#/mobile",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2D9B51",
+  "lang": "en",
+  "categories": ["shopping", "food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Shop Groceries",
+      "short_name": "Shop",
+      "description": "Browse all 4,600+ Sawa Citi products",
+      "url": "/#/mobile/shop",
+      "icons": [{ "src": "/icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Wishlist",
+      "short_name": "Wishlist",
+      "description": "View your saved items",
+      "url": "/#/mobile/wishlist",
+      "icons": [{ "src": "/icon.png", "sizes": "192x192" }]
+    }
+  ]
+}
