@@ -23,18 +23,20 @@ import {
   Store
 } from 'lucide-react';
 
-// Real Unsplash images for each category
+// Images for each of the 12 Sawa Citi categories
 const CATEGORY_IMAGES = {
-  'fruits-vegetables': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=300&q=80',
-  'dairy-eggs':        'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80',
-  'bakery':            'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80',
-  'meat-seafood':      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=300&q=80',
-  'beverages':         'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=300&q=80',
-  'snacks':            'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=300&q=80',
-  'pantry':            'https://images.unsplash.com/photo-1505935428862-770b6f24f629?auto=format&fit=crop&w=300&q=80',
-  'household':         'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80',
-  'personal-care':     'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=300&q=80',
-  'baby-care':         'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=300&q=80',
+  'groceries':     'https://images.unsplash.com/photo-1505935428862-770b6f24f629?auto=format&fit=crop&w=400&q=80',
+  'fresh-produce': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=400&q=80',
+  'meat-fish':     'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=400&q=80',
+  'beverages':     'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=400&q=80',
+  'wines-spirits': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=400&q=80',
+  'snacks':        'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80',
+  'dairy':         'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80',
+  'household':     'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80',
+  'beauty':        'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=400&q=80',
+  'baby':          'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=400&q=80',
+  'kitchen':       'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=400&q=80',
+  'electronics':   'https://images.unsplash.com/photo-1588508065123-287b28e013da?auto=format&fit=crop&w=400&q=80',
 };
 
 export const Home = () => {
@@ -56,8 +58,8 @@ export const Home = () => {
     const interval = setInterval(() => {
       currentStep++;
       setShoppersCount(Math.min(Math.round((10000 / steps) * currentStep), 10000));
-      setProductsCount(Math.min(Math.round((2000 / steps) * currentStep), 2000));
-      setLocationsCount(Math.min(Math.round((25 / steps) * currentStep), 25));
+      setProductsCount(Math.min(Math.round((4600 / steps) * currentStep), 4600));
+      setLocationsCount(Math.min(Math.round((8 / steps) * currentStep), 8));
 
       if (currentStep >= steps) clearInterval(interval);
     }, stepTime);
@@ -65,10 +67,8 @@ export const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-
   // --- COUNTDOWN TIMER (Deals Section) ---
-
-  const [timeLeft, setTimeLeft] = useState(15512); // seconds (approx 4h 18m 32s)
+  const [timeLeft, setTimeLeft] = useState(15512);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -98,17 +98,17 @@ export const Home = () => {
     let filtered = [];
     switch (activeTab) {
       case 'new':
-        filtered = PRODUCTS.filter(p => p.id === 'p3' || p.id === 'p17' || p.id === 'p20' || p.id === 'p41' || p.id === 'p42');
+        filtered = PRODUCTS.filter(p => Array.isArray(p.tags) && p.tags.includes('imported')).slice(0, 5);
         break;
       case 'rated':
-        filtered = PRODUCTS.filter(p => p.rating >= 4.8).slice(0, 5);
+        filtered = PRODUCTS.filter(p => (p.rating || 0) >= 4.7).slice(0, 5);
         break;
       case 'healthy':
-        filtered = PRODUCTS.filter(p => p.name.includes('Organic') || p.category === 'Fruits & Vegetables').slice(4, 9);
+        filtered = PRODUCTS.filter(p => p.categorySlug === 'fresh-produce' || (Array.isArray(p.tags) && p.tags.includes('fresh'))).slice(0, 5);
         break;
       case 'popular':
       default:
-        filtered = PRODUCTS.filter(p => p.isFeatured).slice(0, 5);
+        filtered = PRODUCTS.filter(p => p.isFeatured || (Array.isArray(p.tags) && p.tags.includes('bestseller'))).slice(0, 5);
         break;
     }
     setTabProducts(filtered);
@@ -117,8 +117,8 @@ export const Home = () => {
   // --- INTERACTIVE MAP PREVIEW ---
   const [hoveredStore, setHoveredStore] = useState('s1');
 
-  // Filter deal products
-  const dealProducts = PRODUCTS.filter((p) => p.isDeal).slice(0, 4);
+  // Filter deal products from dataset
+  const dealProducts = PRODUCTS.filter((p) => p.isDeal || p.discount > 0).slice(0, 4);
 
   // Category Icon Renderer
   const renderCategoryIcon = (iconName) => {

@@ -2,10 +2,13 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCTS } from '../data/mockData';
-import { Sparkles, Timer, Percent, ArrowRight } from 'lucide-react';
+import { Sparkles, Timer, Percent, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 32;
 
 export const Deals = () => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Simulate deal expiration countdown
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 32, seconds: 45 });
@@ -20,17 +23,28 @@ export const Deals = () => {
         } else if (prev.hours > 0) {
           return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
         } else {
-          return { hours: 12, minutes: 0, seconds: 0 }; // reset
+          return { hours: 12, minutes: 0, seconds: 0 };
         }
       });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Filter products on discount
+  // Filter products on discount or marked as deals
   const dealProducts = useMemo(() => {
-    return PRODUCTS.filter(p => p.discount > 0);
+    return PRODUCTS.filter(p => p.discount > 0 || p.isDeal || (Array.isArray(p.tags) && (p.tags.includes('deal') || p.tags.includes('sale') || p.tags.includes('bestseller'))));
   }, []);
+
+  const totalPages = Math.ceil(dealProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return dealProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [dealProducts, currentPage]);
+
+  const handlePageChange = (p) => {
+    setCurrentPage(p);
+    window.scrollTo({ top: 120, behavior: 'smooth' });
+  };
 
   return (
     <div style={styles.page}>
@@ -40,10 +54,12 @@ export const Deals = () => {
           <div style={styles.bannerInfo}>
             <div style={styles.badgeRow}>
               <Percent size={14} />
-              <span>FLASH SALES</span>
+              <span>SAWA CITI WEEKLY SAVINGS</span>
             </div>
-            <h1 style={styles.title}>Weekly Discounts</h1>
-            <p style={styles.desc}>Save big on local favorites from Inyange and Masaka. Harvested fresh, priced friendly.</p>
+            <h1 style={styles.title}>Weekly Discounts &amp; Deals</h1>
+            <p style={styles.desc}>
+              Save big on daily essentials across all 8 Sawa Citi branches in Kigali. Stock up on grains, pantry favorites, beverages, and household goods.
+            </p>
           </div>
 
           <div style={styles.timerBlock}>
@@ -69,10 +85,33 @@ export const Deals = () => {
 
         {/* Product Grid */}
         <div style={styles.grid}>
-          {dealProducts.map(product => (
+          {paginatedProducts.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={styles.paginationRow}>
+            <button 
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              style={{ ...styles.pageNavBtn, opacity: currentPage === 1 ? 0.4 : 1 }}
+            >
+              <ChevronLeft size={18} /> Prev
+            </button>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button 
+              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              style={{ ...styles.pageNavBtn, opacity: currentPage === totalPages ? 0.4 : 1 }}
+            >
+              Next <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
 
         {/* Loyalty Program Link */}
         <div style={styles.loyaltyPromo}>
@@ -80,7 +119,7 @@ export const Deals = () => {
             <Sparkles size={24} color="var(--color-primary-dark)" />
             <div>
               <h3 style={styles.loyaltyTitle}>Want even bigger savings?</h3>
-              <p style={styles.loyaltyDesc}>Join Freshio+ for 2,999 RWF/month to unlock up to 40% off member exclusive items.</p>
+              <p style={styles.loyaltyDesc}>Join Freshio+ for 2,999 RWF/month to unlock unlimited free delivery across Kigali.</p>
             </div>
           </div>
           <button onClick={() => navigate('/account')} style={styles.joinBtn} className="btn btn-primary">
@@ -94,17 +133,17 @@ export const Deals = () => {
 
 const styles = {
   page: {
-    padding: '40px 0 80px 0',
+    padding: '32px 0 80px 0',
   },
   banner: {
     backgroundImage: 'linear-gradient(135deg, #FF5A5F 0%, #D83B41 100%)',
     borderRadius: '24px',
-    padding: '40px',
+    padding: '36px',
     color: '#FFFFFF',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '40px',
+    marginBottom: '32px',
     flexWrap: 'wrap',
     gap: '24px',
     boxShadow: '0 8px 24px rgba(216, 59, 65, 0.08)',
@@ -131,12 +170,12 @@ const styles = {
   },
   desc: {
     fontSize: '14px',
-    color: 'rgba(255, 255, 255, 0.85)',
-    lineHeight: '1.4',
+    color: 'rgba(255, 255, 255, 0.88)',
+    lineHeight: '1.5',
   },
   timerBlock: {
     backgroundColor: 'rgba(0,0,0,0.15)',
-    padding: '20px 24px',
+    padding: '18px 22px',
     borderRadius: '16px',
     display: 'flex',
     flexDirection: 'column',
@@ -151,7 +190,7 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.85)',
   },
   digits: {
     display: 'flex',
@@ -164,7 +203,7 @@ const styles = {
     alignItems: 'center',
   },
   digitVal: {
-    fontSize: '28px',
+    fontSize: '26px',
     fontWeight: '800',
     color: '#FFFFFF',
   },
@@ -175,25 +214,36 @@ const styles = {
     fontWeight: '600',
   },
   colon: {
-    fontSize: '24px',
+    fontSize: '22px',
     fontWeight: '800',
     color: 'rgba(255,255,255,0.6)',
-    paddingBottom: '16px',
+    paddingBottom: '14px',
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '20px',
-    marginBottom: '48px',
-    '@media (max-width: 1024px)': {
-      gridTemplateColumns: 'repeat(3, 1fr)',
-    },
-    '@media (max-width: 768px)': {
-      gridTemplateColumns: 'repeat(2, 1fr)',
-    },
-    '@media (max-width: 480px)': {
-      gridTemplateColumns: '1fr',
-    },
+    gap: '18px',
+    marginBottom: '32px',
+  },
+  paginationRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '16px',
+    padding: '16px 0 32px 0',
+  },
+  pageNavBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '8px 14px',
+    borderRadius: '10px',
+    border: '1.5px solid var(--color-border)',
+    backgroundColor: '#FFFFFF',
+    fontSize: '13px',
+    fontWeight: '700',
+    color: 'var(--color-text)',
+    cursor: 'pointer',
   },
   loyaltyPromo: {
     backgroundColor: 'var(--color-primary-light)',
@@ -231,4 +281,5 @@ const styles = {
     gap: '6px',
   },
 };
+
 export default Deals;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, History, TrendingUp, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Search, X, History, TrendingUp, ArrowRight, Tag } from 'lucide-react';
 import { PRODUCTS, CATEGORIES, RECENT_SEARCHES, POPULAR_SEARCHES } from '../data/mockData';
 
 export const SearchOverlay = ({ isOpen, onClose }) => {
@@ -12,7 +12,6 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      // Focus the search input when overlay opens
       setTimeout(() => inputRef.current?.focus(), 100);
       document.body.style.overflow = 'hidden';
     } else {
@@ -25,26 +24,29 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  // Dynamic filtering of products
+  // Dynamic filtering of products across name, SKU, brand, category, tags, description
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
       return;
     }
-    const searchTerm = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     const filtered = PRODUCTS.filter(
       (product) =>
-        product.name.toLowerCase().includes(searchTerm) ||
-        product.category.toLowerCase().includes(searchTerm) ||
-        product.brand.toLowerCase().includes(searchTerm)
-    ).slice(0, 5); // Limit to top 5 results for sleek look
+        product.name.toLowerCase().includes(q) ||
+        (product.sku && product.sku.toLowerCase().includes(q)) ||
+        (product.category && product.category.toLowerCase().includes(q)) ||
+        (product.brand && product.brand.toLowerCase().includes(q)) ||
+        (Array.isArray(product.tags) && product.tags.some(t => t.toLowerCase().includes(q)))
+    ).slice(0, 8); // Top 8 matched results
+
     setResults(filtered);
   }, [query]);
 
-  // Real-time suggestions based on current query typing
+  // Suggestions based on query
   const suggestions = useMemo(() => {
     if (!query.trim()) return [];
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     const list = [];
     
     // 1. Check matching categories
@@ -56,23 +58,23 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
     
     // 2. Check matching brands
     PRODUCTS.forEach(p => {
-      if (p.brand.toLowerCase().includes(q) && !list.includes(p.brand)) {
+      if (p.brand && p.brand !== 'Sawa Citi' && p.brand.toLowerCase().includes(q) && !list.includes(p.brand)) {
         list.push(p.brand);
       }
     });
 
-    // 3. Extract matching terms from product titles
-    PRODUCTS.forEach(p => {
+    // 3. Extract words from product titles
+    PRODUCTS.slice(0, 500).forEach(p => {
       const words = p.name.split(' ');
       words.forEach(w => {
-        const cleanWord = w.replace(/[^a-zA-Z]/g, '');
+        const cleanWord = w.replace(/[^a-zA-Z0-9]/g, '');
         if (cleanWord.length > 3 && cleanWord.toLowerCase().startsWith(q) && !list.includes(cleanWord)) {
           list.push(cleanWord);
         }
       });
     });
 
-    return list.slice(0, 5); // Return top 5 matched terms
+    return list.slice(0, 6);
   }, [query]);
 
   if (!isOpen) return null;
@@ -86,13 +88,18 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
   };
 
   const handleTagClick = (tag) => {
-    setQuery(tag); // Pre-fill searchbar instead of immediate redirect
+    setQuery(tag);
     inputRef.current?.focus();
   };
 
   const handleProductClick = (id) => {
     onClose();
     navigate(`/product/${id}`);
+  };
+
+  const handleCategoryClick = (slug) => {
+    onClose();
+    navigate(`/category/${slug}`);
   };
 
   return (
@@ -113,7 +120,7 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
             <input
               ref={inputRef}
               type="text"
-              placeholder="Search fresh fruits, dairy, bakery, snacks..."
+              placeholder="Search 4,600+ items by Name, SKU (e.g. g001), Brand, Category..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
@@ -140,7 +147,6 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
                 key={sug}
                 onClick={() => handleTagClick(sug)}
                 style={styles.suggestionTag}
-                className="suggestion-tag-hover"
               >
                 {sug}
               </button>
@@ -148,13 +154,24 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
           </div>
         )}
 
-        {/* Dynamic Results vs Recommendations */}
+        {/* Results vs Categories Showcase */}
         <div style={styles.body}>
           {query.trim() ? (
             <div style={styles.resultsSection}>
-              <h4 style={styles.sectionTitle}>
-                Search Results ({results.length})
-              </h4>
+              <div style={styles.resultsHeader}>
+                <h4 style={styles.sectionTitle}>
+                  Matched Products ({results.length})
+                </h4>
+                {results.length > 0 && (
+                  <button 
+                    onClick={handleSearchSubmit}
+                    style={styles.viewAllResultsBtn}
+                  >
+                    View all in Shop <ArrowRight size={14} />
+                  </button>
+                )}
+              </div>
+
               {results.length > 0 ? (
                 <div style={styles.resultsList}>
                   {results.map((product) => (
@@ -164,90 +181,84 @@ export const SearchOverlay = ({ isOpen, onClose }) => {
                       style={styles.productRow}
                     >
                       <img 
-                        src={product.image} 
+                        src={product.image || product.imageUrl} 
                         alt={product.name} 
                         style={styles.productImg} 
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23EAF8F0"/><circle cx="50" cy="50" r="20" fill="%23FFFFFF"/><path d="M50 40 C44 48 44 56 50 64 C56 56 56 48 50 40 Z" fill="%2320B86B"/></svg>';
+                          e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23EAF8F0"/><text x="50" y="55" font-size="24" text-anchor="middle">🛒</text></svg>';
                         }}
                       />
                       <div style={styles.productInfo}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                          <span style={styles.productCategory}>{product.categoryName || product.category}</span>
+                          {product.sku && <span style={styles.productSku}>{product.sku}</span>}
+                        </div>
                         <h4 style={styles.productName}>{product.name}</h4>
-                        <span style={styles.productCategory}>{product.category} • {product.unit}</span>
+                        {product.unit && <span style={styles.productUnit}>{product.unit}</span>}
                       </div>
                       <div style={styles.priceCol}>
-                        <span style={styles.productPrice}>{product.price.toLocaleString()} RWF</span>
-                        {product.discount > 0 && <span style={styles.discountBadge}>{product.discount}% OFF</span>}
-                      </div>
-                      <div style={styles.actionPrompt}>
-                        <span style={{ fontSize: '11px', marginRight: '6px' }}>View</span>
-                        <CornerDownLeft size={12} />
+                        <span style={styles.productPrice}>{(product.price || 0).toLocaleString()} RWF</span>
+                        {product.originalPrice > product.price && (
+                          <span style={styles.origPrice}>{(product.originalPrice).toLocaleString()} RWF</span>
+                        )}
                       </div>
                     </div>
                   ))}
-                  
-                  {/* View All Results CTA */}
-                  <button
-                    onClick={handleSearchSubmit}
-                    style={styles.viewAllBtn}
-                  >
-                    View all matching products <ArrowRight size={16} style={{ marginLeft: '8px' }} />
-                  </button>
                 </div>
               ) : (
-                <div style={styles.noResults}>
-                  <p style={styles.noResultsText}>Hmm... we couldn't find matches for "{query}".</p>
-                  <p style={styles.noResultsSub}>Try checking spelling or exploring popular categories below.</p>
-                  <button
-                    onClick={() => {
-                      onClose();
-                      navigate('/shop');
-                    }}
-                    className="btn btn-outline"
-                    style={{ marginTop: '12px' }}
+                <div style={styles.emptyResults}>
+                  <p>No matching Sawa Citi products found for "{query}".</p>
+                  <button 
+                    onClick={() => { onClose(); navigate('/shop'); }}
+                    className="btn btn-primary"
+                    style={{ marginTop: '12px', padding: '8px 18px', borderRadius: '10px' }}
                   >
-                    Browse Entire Shop
+                    Browse All 4,600+ Products
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <div style={styles.recommendationsGrid}>
-              {/* Recent Searches */}
-              <div>
-                <h4 style={styles.sectionTitle}>
-                  <History size={16} style={{ marginRight: '8px' }} />
-                  Recent Searches
-                </h4>
-                <div style={styles.tagsContainer}>
-                  {RECENT_SEARCHES.map((term) => (
+            <div style={styles.defaultContent}>
+              {/* Popular Searches */}
+              <div style={styles.section}>
+                <div style={styles.sectionHeading}>
+                  <TrendingUp size={16} color="var(--color-primary)" />
+                  <h4>Trending in Kigali</h4>
+                </div>
+                <div style={styles.tagsGrid}>
+                  {POPULAR_SEARCHES.map((item, idx) => (
                     <button
-                      key={term}
-                      onClick={() => handleTagClick(term)}
-                      style={styles.tagBtn}
+                      key={idx}
+                      onClick={() => handleTagClick(item)}
+                      style={styles.popularTag}
                     >
-                      {term}
+                      {item}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Popular Searches */}
-              <div style={{ marginTop: '32px' }}>
-                <h4 style={styles.sectionTitle}>
-                  <TrendingUp size={16} style={{ marginRight: '8px' }} />
-                  Popular Searches
-                </h4>
-                <div style={styles.tagsContainer}>
-                  {POPULAR_SEARCHES.map((term) => (
-                    <button
-                      key={term}
-                      onClick={() => handleTagClick(term)}
-                      style={styles.tagBtnPopular}
+              {/* Browse 12 Categories */}
+              <div style={styles.section}>
+                <div style={styles.sectionHeading}>
+                  <History size={16} color="var(--color-primary)" />
+                  <h4>Supermarket Categories</h4>
+                </div>
+                <div style={styles.categoriesGrid}>
+                  {CATEGORIES.map((cat) => (
+                    <div
+                      key={cat.id}
+                      onClick={() => handleCategoryClick(cat.slug)}
+                      style={styles.catCard}
                     >
-                      {term}
-                    </button>
+                      <span style={{ fontSize: '20px' }}>{cat.emoji}</span>
+                      <div style={styles.catCardInfo}>
+                        <h5 style={styles.catName}>{cat.name}</h5>
+                        <span style={styles.catCount}>{cat.itemCount}</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -266,273 +277,254 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(23, 37, 31, 0.6)',
+    backgroundColor: 'rgba(22, 58, 53, 0.45)',
     backdropFilter: 'blur(8px)',
-    zIndex: 1060,
-    animation: 'fadeIn 0.2s ease-out',
+    zIndex: 9999,
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    paddingTop: '60px',
   },
   content: {
     backgroundColor: '#FFFFFF',
-    width: '100%',
-    maxHeight: '80vh',
-    overflowY: 'auto',
-    borderBottomLeftRadius: '32px',
-    borderBottomRightRadius: '32px',
-    boxShadow: '0 20px 60px rgba(8, 122, 75, 0.1)',
+    width: '90%',
+    maxWidth: '740px',
+    height: 'fit-content',
+    maxHeight: '85vh',
+    borderRadius: '24px',
+    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.15)',
     display: 'flex',
     flexDirection: 'column',
-    animation: 'fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+    overflow: 'hidden',
+    border: '1px solid var(--color-border)',
   },
   searchBarWrapper: {
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--color-border)',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '24px 40px',
-    borderBottom: '1px solid var(--color-border)',
-    maxWidth: 'var(--max-width)',
-    margin: '0 auto',
-    width: '100%',
-    gap: '24px',
+    gap: '12px',
   },
   searchForm: {
     display: 'flex',
     alignItems: 'center',
     flexGrow: 1,
-    backgroundColor: '#F3F6F4',
-    padding: '0 20px',
+    padding: '10px 16px',
     borderRadius: '16px',
-    border: '2px solid transparent',
+    border: '1.5px solid transparent',
     transition: 'all 0.2s',
   },
   searchInput: {
-    width: '100%',
-    height: '52px',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'var(--color-text)',
     border: 'none',
     outline: 'none',
-    background: 'transparent',
+    backgroundColor: 'transparent',
+    width: '100%',
+    fontSize: '15px',
+    fontWeight: '600',
+    color: 'var(--color-text)',
   },
   clearBtn: {
-    padding: '4px',
-    borderRadius: '50%',
-    backgroundColor: '#CBD5E1',
-    color: '#FFFFFF',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'var(--color-text-secondary)',
+    cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
   },
   closeBtn: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    fontSize: '14px',
-    fontWeight: '700',
-    color: 'var(--color-text-secondary)',
-    cursor: 'pointer',
-    backgroundColor: '#F3F6F4',
-    padding: '12px 18px',
-    borderRadius: '12px',
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: '#EAEBE8',
-      color: 'var(--color-text)',
-    },
-  },
-  body: {
-    maxWidth: 'var(--max-width)',
-    margin: '0 auto',
-    width: '100%',
-    padding: '40px',
-  },
-  resultsSection: {
-    width: '100%',
-  },
-  sectionTitle: {
-    fontSize: '14px',
-    fontWeight: '800',
-    color: 'var(--color-text-secondary)',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    marginBottom: '20px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  resultsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  productRow: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '16px 20px',
-    backgroundColor: '#FFFDF7',
-    border: '1px solid var(--color-border)',
-    borderRadius: '16px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    '&:hover': {
-      borderColor: 'var(--color-primary)',
-      backgroundColor: '#FFFFFF',
-      transform: 'translateY(-2px)',
-      boxShadow: 'var(--shadow-sm)',
-    },
-  },
-  productImg: {
-    width: '48px',
-    height: '48px',
+    border: 'none',
+    backgroundColor: '#F3F4F6',
+    color: 'var(--color-text)',
+    padding: '8px 14px',
     borderRadius: '10px',
-    objectFit: 'cover',
-    marginRight: '16px',
-    border: '1px solid var(--color-border)',
-  },
-  productInfo: {
-    flexGrow: 1,
-  },
-  productName: {
-    fontSize: '15px',
-    fontWeight: '700',
-    color: 'var(--color-text)',
-    margin: 0,
-  },
-  productCategory: {
     fontSize: '12px',
-    color: 'var(--color-text-secondary)',
-    marginTop: '2px',
-  },
-  priceCol: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    marginRight: '24px',
-  },
-  productPrice: {
-    fontSize: '16px',
-    fontWeight: '800',
-    color: 'var(--color-text)',
-  },
-  discountBadge: {
-    fontSize: '10px',
-    fontWeight: '800',
-    color: '#FF5A5F',
-    backgroundColor: '#FFEBEB',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    marginTop: '2px',
-  },
-  actionPrompt: {
+    fontWeight: '700',
+    cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
-    color: 'var(--color-primary-dark)',
-    fontWeight: '700',
-  },
-  viewAllBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    padding: '16px',
-    borderRadius: '16px',
-    backgroundColor: 'var(--color-primary-light)',
-    color: 'var(--color-primary-dark)',
-    fontSize: '14px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    marginTop: '12px',
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: 'var(--color-primary)',
-      color: '#FFFFFF',
-    },
-  },
-  noResults: {
-    textAlign: 'center',
-    padding: '40px 20px',
-  },
-  noResultsText: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: 'var(--color-text)',
-    marginBottom: '4px',
-  },
-  noResultsSub: {
-    fontSize: '14px',
-    color: 'var(--color-text-secondary)',
-  },
-  recommendationsGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-  },
-  tagsContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '10px',
-  },
-  tagBtn: {
-    padding: '10px 20px',
-    borderRadius: '30px',
-    border: '1.5px solid var(--color-border)',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'var(--color-text-secondary)',
-    backgroundColor: '#FFFFFF',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    '&:hover': {
-      borderColor: 'var(--color-text)',
-      color: 'var(--color-text)',
-      backgroundColor: '#F3F6F4',
-    },
-  },
-  tagBtnPopular: {
-    padding: '10px 20px',
-    borderRadius: '30px',
-    border: '1.5px solid transparent',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'var(--color-primary-dark)',
-    backgroundColor: 'var(--color-primary-light)',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: 'var(--color-primary)',
-      color: '#FFFFFF',
-    },
+    whiteSpace: 'nowrap',
   },
   suggestionsRow: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    flexWrap: 'wrap',
-    padding: '12px 40px 0 40px',
-    maxWidth: 'var(--max-width)',
-    margin: '0 auto',
-    width: '100%',
+    padding: '10px 24px',
+    backgroundColor: '#F9FAFB',
+    borderBottom: '1px solid var(--color-border)',
+    overflowX: 'auto',
   },
   suggestionsLabel: {
-    fontSize: '12px',
-    fontWeight: '800',
+    fontSize: '11.5px',
+    fontWeight: '700',
     color: 'var(--color-text-secondary)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginRight: '4px',
   },
   suggestionTag: {
-    padding: '6px 14px',
-    borderRadius: '20px',
-    border: '1.5px solid var(--color-primary)',
-    backgroundColor: 'var(--color-primary-light)',
-    color: 'var(--color-primary-dark)',
+    padding: '4px 10px',
+    borderRadius: '8px',
+    border: '1px solid var(--color-border)',
+    backgroundColor: '#FFFFFF',
     fontSize: '12px',
+    color: 'var(--color-text)',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  },
+  body: {
+    padding: '24px',
+    overflowY: 'auto',
+  },
+  resultsSection: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  resultsHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '14px',
+  },
+  sectionTitle: {
+    fontSize: '14px',
+    fontWeight: '800',
+    color: 'var(--color-text)',
+  },
+  viewAllResultsBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'var(--color-primary-dark)',
+    fontSize: '13px',
     fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+  },
+  resultsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  productRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    padding: '10px 14px',
+    borderRadius: '14px',
+    backgroundColor: '#F9FAFB',
+    cursor: 'pointer',
+    transition: 'background 0.15s',
+  },
+  productImg: {
+    width: '46px',
+    height: '46px',
+    borderRadius: '10px',
+    objectFit: 'contain',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid var(--color-border)',
+    padding: '2px',
+  },
+  productInfo: {
+    flexGrow: 1,
+  },
+  productCategory: {
+    fontSize: '10.5px',
+    fontWeight: '700',
+    color: 'var(--color-text-secondary)',
+    textTransform: 'uppercase',
+  },
+  productSku: {
+    fontSize: '10px',
+    fontWeight: '700',
+    color: 'var(--color-primary)',
+    backgroundColor: 'var(--color-primary-light)',
+    padding: '1px 4px',
+    borderRadius: '4px',
+    fontFamily: 'monospace',
+  },
+  productName: {
+    fontSize: '13.5px',
+    fontWeight: '700',
+    color: 'var(--color-text)',
+    marginBottom: '2px',
+  },
+  productUnit: {
+    fontSize: '11px',
+    color: 'var(--color-text-secondary)',
+  },
+  priceCol: {
+    textAlign: 'right',
+  },
+  productPrice: {
+    fontSize: '14px',
+    fontWeight: '800',
+    color: 'var(--color-text)',
+    display: 'block',
+  },
+  origPrice: {
+    fontSize: '11px',
+    color: 'var(--color-text-secondary)',
+    textDecoration: 'line-through',
+  },
+  emptyResults: {
+    textAlign: 'center',
+    padding: '32px 0',
+    color: 'var(--color-text-secondary)',
+  },
+  defaultContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+  },
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  sectionHeading: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  tagsGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  popularTag: {
+    padding: '8px 14px',
+    borderRadius: '12px',
+    border: '1px solid var(--color-border)',
+    backgroundColor: '#F9FAFB',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: 'var(--color-text)',
+    cursor: 'pointer',
+  },
+  categoriesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '10px',
+  },
+  catCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '10px 12px',
+    borderRadius: '12px',
+    backgroundColor: '#F9FAFB',
+    cursor: 'pointer',
+    border: '1px solid var(--color-border)',
+  },
+  catCardInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  catName: {
+    fontSize: '12px',
+    fontWeight: '700',
+    color: 'var(--color-text)',
+  },
+  catCount: {
+    fontSize: '10.5px',
+    color: 'var(--color-text-secondary)',
   },
 };
 

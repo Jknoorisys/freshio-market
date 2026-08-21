@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Logo = ({ variant = 'dark', height = 32, showTagline = false }) => {
+export const Logo = ({ variant = 'dark', height = 48, showTagline = false }) => {
   if (variant === 'icon') {
     return (
       <img
@@ -17,18 +17,19 @@ export const Logo = ({ variant = 'dark', height = 32, showTagline = false }) => 
       <img
         src="/logo.png"
         alt="Freshio Market Logo"
-        style={{ height: `${height}px`, width: 'auto', objectFit: 'contain', display: 'block' }}
+        style={{ height: `${height}px`, width: 'auto', minWidth: '130px', objectFit: 'contain', display: 'block' }}
       />
       {showTagline && (
         <span
           style={{
-            fontSize: '9px',
+            fontSize: '9.5px',
             fontWeight: 800,
             color: 'var(--color-primary)',
             letterSpacing: '1px',
-            marginTop: '3px',
+            marginTop: '2px',
             textTransform: 'uppercase',
-            paddingLeft: '2px'
+            paddingLeft: '2px',
+            whiteSpace: 'nowrap'
           }}
         >
           Kigali's Fresh Choice

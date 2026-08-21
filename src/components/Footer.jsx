@@ -104,13 +104,14 @@ export const Footer = () => {
           <div style={styles.linkCol}>
             <h4 style={styles.colTitle}>Shop</h4>
             <ul style={styles.linkList}>
-              <li><Link to="/shop" className="footer-nav-link">All Products</Link></li>
-              <li><Link to="/category/fruits-vegetables" className="footer-nav-link">Fresh Produce</Link></li>
-              <li><Link to="/category/dairy-eggs" className="footer-nav-link">Dairy &amp; Eggs</Link></li>
-              <li><Link to="/category/bakery" className="footer-nav-link">Bakery</Link></li>
-              <li><Link to="/category/beverages" className="footer-nav-link">Beverages</Link></li>
-              <li><Link to="/category/snacks" className="footer-nav-link">Snacks &amp; Sweets</Link></li>
-              <li><Link to="/deals" className="footer-nav-link">Today's Deals</Link></li>
+              <li><Link to="/shop" className="footer-nav-link">All Products (4,600+)</Link></li>
+              <li><Link to="/category/groceries" className="footer-nav-link">🛒 Groceries</Link></li>
+              <li><Link to="/category/fresh-produce" className="footer-nav-link">🥬 Fresh Produce</Link></li>
+              <li><Link to="/category/meat-fish" className="footer-nav-link">🍗 Meat &amp; Fish</Link></li>
+              <li><Link to="/category/beverages" className="footer-nav-link">🥤 Beverages</Link></li>
+              <li><Link to="/category/wines-spirits" className="footer-nav-link">🍷 Wines &amp; Spirits</Link></li>
+              <li><Link to="/category/dairy" className="footer-nav-link">🧀 Dairy &amp; Frozen</Link></li>
+              <li><Link to="/deals" className="footer-nav-link">🏷️ Weekly Deals</Link></li>
             </ul>
           </div>
 

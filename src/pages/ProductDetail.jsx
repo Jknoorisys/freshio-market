@@ -1,31 +1,62 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ProductCard } from '../components/ProductCard';
-import { PRODUCTS } from '../data/mockData';
-import { ArrowLeft, Star, Heart, ShoppingBag, Plus, Minus, Truck, Shield, Calendar, ArrowRight } from 'lucide-react';
+import { PRODUCTS, findProduct } from '../data/mockData';
+import { 
+  ArrowLeft, 
+  Star, 
+  Heart, 
+  ShoppingBag, 
+  Plus, 
+  Minus, 
+  Truck, 
+  Shield, 
+  Calendar, 
+  ArrowRight,
+  Tag,
+  Store,
+  CheckCircle2,
+  Share2
+} from 'lucide-react';
 
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const { cart, addToCart, updateQuantity, wishlist, toggleWishlist, addToast } = useApp();
+  const { cart, addToCart, wishlist, toggleWishlist, addToast } = useApp();
 
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('sourcing');
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [activeTab, setActiveTab] = useState('details');
 
-  // Find active product
+  // Find active product by id, sku, or slug
   const product = useMemo(() => {
-    return PRODUCTS.find(p => p.id === id);
+    return findProduct(id) || PRODUCTS.find(p => p.id === id || p.sku === id || p.slug === id);
   }, [id]);
+
+  // Check if product is currently in cart / wishlist
+  const cartItem = product ? cart.find(item => item.product.id === product.id || item.product.sku === product.sku) : null;
+  const isInWishlist = product ? wishlist.includes(product.id) : false;
+
+  // Load related products (from same category, excluding current product)
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    const catSlug = product.categorySlug || product.category;
+    return PRODUCTS
+      .filter(p => (p.categorySlug === catSlug || p.category === product.category) && p.id !== product.id)
+      .slice(0, 4);
+  }, [product]);
 
   // Handle missing product
   if (!product) {
     return (
       <div style={styles.errorContainer}>
-        <span style={{ fontSize: '64px' }}>🥬</span>
-        <h2>Product Not Found</h2>
-        <p>The product you are trying to view does not exist or has been removed from our Kigali database.</p>
+        <span style={{ fontSize: '64px' }}>🛒</span>
+        <h2 style={{ margin: '16px 0 8px 0', fontSize: '24px', fontWeight: '800' }}>Product Not Found</h2>
+        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+          The product you are trying to view does not exist in our Sawa Citi Kigali catalog.
+        </p>
         <button onClick={() => navigate('/shop')} className="btn btn-primary" style={{ borderRadius: '12px' }}>
           Back to Shop Catalog
         </button>
@@ -33,20 +64,13 @@ export const ProductDetail = () => {
     );
   }
 
-  // Check if product is currently in cart
-  const cartItem = cart.find(item => item.id === product.id);
-  const isInWishlist = wishlist.includes(product.id);
-
-  // Load related products (excluding current product)
-  const relatedProducts = useMemo(() => {
-    return PRODUCTS
-      .filter(p => p.category === product.category && p.id !== product.id)
-      .slice(0, 4);
-  }, [product]);
+  const galleryImages = (product.imageUrls && product.imageUrls.length > 0) 
+    ? product.imageUrls 
+    : [product.image || product.imageUrl].filter(Boolean);
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
-    addToast(`${product.name} (${quantity} units) added to cart`, 'success');
+    addToast(`${product.name} (${quantity} items) added to cart`, 'success');
   };
 
   const handleWishlistToggle = () => {
@@ -58,27 +82,55 @@ export const ProductDetail = () => {
     }
   };
 
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: product.name,
+        text: `Check out ${product.name} on Freshio Sawa Citi Kigali!`,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      addToast('Product link copied to clipboard!', 'info');
+    }
+  };
+
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23F4F6F8"/><circle cx="50" cy="50" r="28" fill="%23E2E8F0"/><text x="50" y="55" font-family="sans-serif" font-size="24" text-anchor="middle">🛒</text></svg>';
+  };
+
   return (
     <div style={styles.page}>
       <div className="container">
         {/* Navigation Breadcrumb */}
-        <button onClick={() => navigate(-1)} style={styles.backBtn}>
-          <ArrowLeft size={16} /> Back
-        </button>
+        <div style={styles.breadcrumbBar}>
+          <button onClick={() => navigate(-1)} style={styles.backBtn}>
+            <ArrowLeft size={16} /> Back
+          </button>
+          <div style={styles.breadcrumbs}>
+            <Link to="/" style={styles.bcLink}>Home</Link>
+            <span style={styles.bcSep}>/</span>
+            <Link to="/shop" style={styles.bcLink}>Shop</Link>
+            <span style={styles.bcSep}>/</span>
+            <Link to={`/category/${product.categorySlug || 'groceries'}`} style={styles.bcLink}>
+              {product.categoryEmoji ? `${product.categoryEmoji} ` : ''}{product.categoryName || product.category}
+            </Link>
+            <span style={styles.bcSep}>/</span>
+            <span style={styles.bcCurrent}>{product.name}</span>
+          </div>
+        </div>
 
         {/* Product Overview Layout */}
         <div style={styles.productMain}>
-          {/* Left Column: Image Frame */}
+          {/* Left Column: Image Frame & Gallery */}
           <div style={styles.imageCol}>
             <div style={styles.imageWrapper}>
               <img 
-                src={product.image} 
+                src={galleryImages[selectedImage] || product.image || product.imageUrl} 
                 alt={product.name} 
                 style={styles.mainImage}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23EAF8F0"/></svg>';
-                }}
+                onError={handleImageError}
               />
               {product.discount > 0 && (
                 <div style={styles.discountBadge}>
@@ -86,18 +138,45 @@ export const ProductDetail = () => {
                 </div>
               )}
             </div>
+
+            {/* Gallery Thumbnails (if multiple images) */}
+            {galleryImages.length > 1 && (
+              <div style={styles.thumbnailRow}>
+                {galleryImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    style={{
+                      ...styles.thumbBtn,
+                      borderColor: selectedImage === idx ? 'var(--color-primary)' : 'var(--color-border)'
+                    }}
+                  >
+                    <img src={img} alt={`${product.name} view ${idx + 1}`} style={styles.thumbImg} onError={handleImageError} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column: Information Panel */}
           <div style={styles.infoCol}>
-            <span style={styles.categoryBreadcrumb}>
-              {product.category} &rsaquo; {product.subcategory}
-            </span>
+            {/* Category and SKU badge */}
+            <div style={styles.headerMetaRow}>
+              <Link to={`/category/${product.categorySlug || 'groceries'}`} style={styles.categoryBadge}>
+                {product.categoryEmoji ? `${product.categoryEmoji} ` : ''}{product.categoryName || product.category}
+              </Link>
+              {product.sku && (
+                <span style={styles.skuTag}>
+                  SKU: <strong>{product.sku}</strong>
+                </span>
+              )}
+            </div>
             
             <h1 style={styles.productTitle}>{product.name}</h1>
             
+            {/* Brand & Ratings */}
             <div style={styles.brandRow}>
-              <span style={styles.brandLabel}>Brand: <strong>{product.brand}</strong></span>
+              <span style={styles.brandLabel}>Brand: <strong>{product.brand || 'Sawa Citi'}</strong></span>
               <span style={styles.divider}>|</span>
               <div style={styles.reviewsRow}>
                 <div style={styles.stars}>
@@ -105,13 +184,13 @@ export const ProductDetail = () => {
                     <Star 
                       key={i} 
                       size={14} 
-                      fill={i < Math.floor(product.rating) ? "var(--color-orange)" : "none"} 
-                      color={i < Math.floor(product.rating) ? "var(--color-orange)" : "#D0D5DD"} 
+                      fill={i < Math.floor(product.rating || 4.5) ? "#FFC107" : "none"} 
+                      color={i < Math.floor(product.rating || 4.5) ? "#FFC107" : "#D0D5DD"} 
                     />
                   ))}
                 </div>
                 <span style={styles.reviewsText}>
-                  {product.rating} ({product.reviews} reviews)
+                  {product.rating || 4.5} ({product.reviews || 12} reviews)
                 </span>
               </div>
             </div>
@@ -120,37 +199,59 @@ export const ProductDetail = () => {
             <div style={styles.priceRow}>
               <div style={styles.priceColumn}>
                 <span style={styles.currentPrice}>
-                  {product.price.toLocaleString()} RWF
+                  {(product.price || 0).toLocaleString()} <span style={styles.currSmall}>RWF</span>
                 </span>
                 {product.originalPrice > product.price && (
                   <span style={styles.originalPrice}>
-                    {product.originalPrice.toLocaleString()} RWF
+                    {(product.originalPrice).toLocaleString()} RWF
                   </span>
                 )}
               </div>
-              <span style={styles.unitBadge}>{product.unit}</span>
+              {product.unit && (
+                <span style={styles.unitBadge}>Unit: {product.unit}</span>
+              )}
             </div>
 
+            {/* Tags Badges */}
+            {Array.isArray(product.tags) && product.tags.length > 0 && (
+              <div style={styles.tagsContainer}>
+                {product.tags.map((t, idx) => (
+                  <span key={idx} style={styles.tagPill}>
+                    <Tag size={11} style={{ marginRight: '4px' }} />
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Description */}
             <p style={styles.description}>{product.description}</p>
 
-            {/* In-Stock indicators */}
-            <div style={styles.stockStatus}>
-              <span style={{
-                ...styles.dot,
-                backgroundColor: product.stock > 0 ? '#10B981' : '#EF4444'
-              }}></span>
-              <span style={styles.stockText}>
-                {product.stock > 0 ? `In Stock (${product.stock} items left)` : 'Out of Stock'}
-              </span>
+            {/* In-Stock status & Sawa Citi branches note */}
+            <div style={styles.availabilityBox}>
+              <div style={styles.stockStatus}>
+                <span style={{
+                  ...styles.dot,
+                  backgroundColor: product.stock > 0 ? '#10B981' : '#EF4444'
+                }}></span>
+                <span style={styles.stockText}>
+                  {product.stock > 0 ? `In Stock (${product.stock} units available)` : 'Out of Stock'}
+                </span>
+              </div>
+              <div style={styles.branchNotice}>
+                <Store size={14} color="var(--color-primary-dark)" />
+                <span>Available at all 8 Sawa Citi branches across Kigali</span>
+              </div>
             </div>
 
-            {/* Cart Controllers */}
+            {/* Cart Controllers & Action Buttons */}
             <div style={styles.actionBlock}>
               <div style={styles.qtyControl}>
                 <button 
                   onClick={() => setQuantity(q => Math.max(1, q - 1))} 
                   style={styles.qtyBtn}
                   disabled={quantity <= 1}
+                  aria-label="Decrease quantity"
                 >
                   <Minus size={16} />
                 </button>
@@ -158,6 +259,7 @@ export const ProductDetail = () => {
                 <button 
                   onClick={() => setQuantity(q => q + 1)} 
                   style={styles.qtyBtn}
+                  aria-label="Increase quantity"
                 >
                   <Plus size={16} />
                 </button>
@@ -165,93 +267,133 @@ export const ProductDetail = () => {
 
               <button 
                 onClick={handleAddToCart} 
-                className="btn btn-primary"
                 style={styles.addToCartBtn}
+                className="btn btn-primary"
+                disabled={product.stock <= 0}
               >
                 <ShoppingBag size={18} />
-                <span>Add To Cart</span>
+                <span>Add {quantity > 1 ? `${quantity} Items` : 'to Cart'} • {((product.price || 0) * quantity).toLocaleString()} RWF</span>
               </button>
 
               <button 
-                onClick={handleWishlistToggle} 
+                onClick={handleWishlistToggle}
                 style={{
-                  ...styles.wishlistBtn,
-                  backgroundColor: isInWishlist ? 'rgba(255, 90, 95, 0.1)' : 'transparent',
-                  borderColor: isInWishlist ? 'var(--color-error)' : 'var(--color-border)',
+                  ...styles.wishlistActionBtn,
+                  backgroundColor: isInWishlist ? 'var(--color-primary-light)' : '#FFFFFF',
+                  borderColor: isInWishlist ? 'var(--color-primary)' : 'var(--color-border)'
                 }}
+                aria-label="Save to Wishlist"
               >
-                <Heart size={20} fill={isInWishlist ? "var(--color-error)" : "none"} color={isInWishlist ? "var(--color-error)" : "var(--color-text)"} />
+                <Heart 
+                  size={20} 
+                  fill={isInWishlist ? "var(--color-primary)" : "none"} 
+                  color={isInWishlist ? "var(--color-primary)" : "var(--color-text-secondary)"} 
+                />
+              </button>
+
+              <button 
+                onClick={handleShare}
+                style={styles.shareBtn}
+                aria-label="Share product"
+              >
+                <Share2 size={18} color="var(--color-text-secondary)" />
               </button>
             </div>
 
-            {/* Quick Sourcing / Delivery Tabs */}
-            <div style={styles.tabsWrapper}>
-              <div style={styles.tabsHeader}>
-                <button 
-                  onClick={() => setActiveTab('sourcing')} 
-                  style={{
-                    ...styles.tabLink,
-                    borderBottomColor: activeTab === 'sourcing' ? 'var(--color-primary)' : 'transparent',
-                    color: activeTab === 'sourcing' ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
-                  }}
-                >
-                  Sourcing & Sincerity
-                </button>
-                <button 
-                  onClick={() => setActiveTab('delivery')} 
-                  style={{
-                    ...styles.tabLink,
-                    borderBottomColor: activeTab === 'delivery' ? 'var(--color-primary)' : 'transparent',
-                    color: activeTab === 'delivery' ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
-                  }}
-                >
-                  Delivery Policy
-                </button>
+            {/* Value Guarantees Banner */}
+            <div style={styles.guaranteeGrid}>
+              <div style={styles.guaranteeItem}>
+                <Truck size={18} color="var(--color-primary)" />
+                <div>
+                  <h5 style={styles.gTitle}>2-Hour Kigali Delivery</h5>
+                  <p style={styles.gDesc}>Temperature-controlled express dispatch</p>
+                </div>
               </div>
-              <div style={styles.tabContent}>
-                {activeTab === 'sourcing' ? (
-                  <div style={styles.tabPane}>
-                    <div style={styles.tabIconLine}>
-                      <Calendar size={18} color="var(--color-primary)" />
-                      <span>Harvested directly from Musanze volcanic plots within 24 hours of dispatch.</span>
-                    </div>
-                    <div style={styles.tabIconLine}>
-                      <Shield size={18} color="var(--color-primary)" />
-                      <span>100% pesticide-free organic certification guaranteed. Sourced honestly.</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={styles.tabPane}>
-                    <div style={styles.tabIconLine}>
-                      <Truck size={18} color="var(--color-primary)" />
-                      <span>Superfast delivery inside Kigali sectors (Kimihurura, Kiyovu, Kacyiru) in under 2 hours.</span>
-                    </div>
-                    <div style={styles.tabIconLine}>
-                      <Shield size={18} color="var(--color-primary)" />
-                      <span>Packed inside temperature-sealed biodegradable carrier packs.</span>
-                    </div>
-                  </div>
-                )}
+              <div style={styles.guaranteeItem}>
+                <Shield size={18} color="var(--color-primary)" />
+                <div>
+                  <h5 style={styles.gTitle}>100% Quality Guaranteed</h5>
+                  <p style={styles.gDesc}>Fresh or hassle-free replacement</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* RELATED PRODUCTS */}
+        {/* Tabbed Specifications & Sawa Citi Details */}
+        <div style={styles.tabsSection}>
+          <div style={styles.tabHeaders}>
+            <button 
+              onClick={() => setActiveTab('details')}
+              style={{ ...styles.tabBtn, borderBottomColor: activeTab === 'details' ? 'var(--color-primary)' : 'transparent', color: activeTab === 'details' ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)' }}
+            >
+              Product Specifications
+            </button>
+            <button 
+              onClick={() => setActiveTab('delivery')}
+              style={{ ...styles.tabBtn, borderBottomColor: activeTab === 'delivery' ? 'var(--color-primary)' : 'transparent', color: activeTab === 'delivery' ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)' }}
+            >
+              Kigali Delivery & Returns
+            </button>
+          </div>
+
+          <div style={styles.tabBody}>
+            {activeTab === 'details' ? (
+              <div style={styles.specTable}>
+                <div style={styles.specRow}>
+                  <span style={styles.specLabel}>Product SKU</span>
+                  <span style={styles.specVal}>{product.sku}</span>
+                </div>
+                <div style={styles.specRow}>
+                  <span style={styles.specLabel}>Category</span>
+                  <span style={styles.specVal}>{product.categoryName || product.category}</span>
+                </div>
+                <div style={styles.specRow}>
+                  <span style={styles.specLabel}>Brand</span>
+                  <span style={styles.specVal}>{product.brand || 'Sawa Citi'}</span>
+                </div>
+                <div style={styles.specRow}>
+                  <span style={styles.specLabel}>Size / Net Weight</span>
+                  <span style={styles.specVal}>{product.sizeLabel || product.unit || 'Standard'}</span>
+                </div>
+                <div style={styles.specRow}>
+                  <span style={styles.specLabel}>Stock Status</span>
+                  <span style={styles.specVal}>{product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of stock'}</span>
+                </div>
+                <div style={styles.specRow}>
+                  <span style={styles.specLabel}>Tags & Categories</span>
+                  <span style={styles.specVal}>{Array.isArray(product.tags) && product.tags.length > 0 ? product.tags.join(', ') : 'Standard Supermarket Item'}</span>
+                </div>
+              </div>
+            ) : (
+              <div style={styles.deliveryContent}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>Delivery in Kigali Sectors</h4>
+                <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '16px' }}>
+                  Orders placed before 7:00 PM are delivered within 2 hours to Nyarutarama, Kiyovu, Kimihurura, Gacuriro, Remera, Kacyiru, Kibagabaga, and Kanombe. We accept MTN MoMo, Airtel Money, Cards, and Cash on Delivery.
+                </p>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', color: 'var(--color-primary-dark)', fontSize: '13px', fontWeight: '600' }}>
+                  <CheckCircle2 size={16} /> Free Delivery on orders over 25,000 RWF (or anytime with Freshio+ membership)
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Related Category Products Section */}
         {relatedProducts.length > 0 && (
-          <section style={styles.relatedSection}>
+          <div style={styles.relatedSection}>
             <div style={styles.relatedHeader}>
-              <h2 style={styles.relatedTitle}>You might also like</h2>
-              <button onClick={() => navigate(`/category/${product.category.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-')}`)} style={styles.moreBtn}>
-                View Category <ArrowRight size={14} />
-              </button>
+              <h3 style={styles.relatedTitle}>More from {product.categoryName || product.category}</h3>
+              <Link to={`/category/${product.categorySlug || 'groceries'}`} style={styles.viewCategoryLink}>
+                View all <ArrowRight size={14} />
+              </Link>
             </div>
             <div style={styles.relatedGrid}>
               {relatedProducts.map(p => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
-          </section>
+          </div>
         )}
       </div>
     </div>
@@ -260,163 +402,258 @@ export const ProductDetail = () => {
 
 const styles = {
   page: {
-    padding: '32px 0 64px 0',
+    padding: '24px 0 64px 0',
+  },
+  errorContainer: {
+    padding: '80px 20px',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  breadcrumbBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
   },
   backBtn: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '8px',
-    background: 'none',
-    border: 'none',
-    fontSize: '14px',
-    color: 'var(--color-text-secondary)',
-    fontWeight: '700',
+    gap: '6px',
+    padding: '8px 14px',
+    borderRadius: '10px',
+    border: '1px solid var(--color-border)',
+    backgroundColor: '#FFFFFF',
+    color: 'var(--color-text)',
+    fontSize: '13px',
+    fontWeight: '600',
     cursor: 'pointer',
-    marginBottom: '24px',
-    padding: 0,
   },
-  errorContainer: {
-    textAlign: 'center',
-    padding: '80px 24px',
+  breadcrumbs: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    gap: '16px',
+    gap: '8px',
+    fontSize: '13px',
+    color: 'var(--color-text-secondary)',
+    flexWrap: 'wrap',
+  },
+  bcLink: {
+    color: 'var(--color-text-secondary)',
+    textDecoration: 'none',
+  },
+  bcSep: {
+    color: '#D0D5DD',
+  },
+  bcCurrent: {
+    color: 'var(--color-text)',
+    fontWeight: '600',
+    maxWidth: '260px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
   productMain: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1.1fr',
+    gridTemplateColumns: '1fr 1fr',
     gap: '48px',
-    marginBottom: '64px',
-    alignItems: 'start',
-    '@media (max-width: 900px)': {
-      gridTemplateColumns: '1fr',
-      gap: '32px',
-    },
+    marginBottom: '48px',
+    backgroundColor: '#FFFFFF',
+    padding: '32px',
+    borderRadius: '24px',
+    border: '1px solid var(--color-border)',
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.03)',
   },
   imageCol: {
-    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   },
   imageWrapper: {
     position: 'relative',
-    backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
-    border: '1.5px solid var(--color-border)',
-    overflow: 'hidden',
-    aspectRatio: '1',
+    width: '100%',
+    height: '380px',
+    borderRadius: '20px',
+    backgroundColor: '#F9FAFB',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+    border: '1px solid var(--color-border)',
     padding: '24px',
-    boxShadow: '0 8px 24px rgba(22, 58, 53, 0.03)',
   },
   mainImage: {
-    maxWidth: '100%',
     maxHeight: '100%',
+    maxWidth: '100%',
     objectFit: 'contain',
   },
   discountBadge: {
     position: 'absolute',
-    top: '20px',
-    left: '20px',
-    backgroundColor: 'var(--color-error)',
+    top: '16px',
+    left: '16px',
+    backgroundColor: '#EF4444',
     color: '#FFFFFF',
     padding: '6px 12px',
     borderRadius: '8px',
     fontSize: '12px',
     fontWeight: '800',
   },
+  thumbnailRow: {
+    display: 'flex',
+    gap: '12px',
+  },
+  thumbBtn: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '12px',
+    border: '2px solid transparent',
+    backgroundColor: '#F9FAFB',
+    cursor: 'pointer',
+    padding: '4px',
+    overflow: 'hidden',
+  },
+  thumbImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+  },
   infoCol: {
     display: 'flex',
     flexDirection: 'column',
   },
-  categoryBreadcrumb: {
-    fontSize: '11px',
-    fontWeight: '800',
-    color: 'var(--color-primary)',
+  headerMetaRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '10px',
+  },
+  categoryBadge: {
+    fontSize: '12px',
+    fontWeight: '700',
+    color: 'var(--color-primary-dark)',
+    backgroundColor: 'var(--color-primary-light)',
+    padding: '4px 10px',
+    borderRadius: '8px',
+    textDecoration: 'none',
     textTransform: 'uppercase',
-    letterSpacing: '1px',
-    marginBottom: '8px',
+  },
+  skuTag: {
+    fontSize: '11px',
+    color: 'var(--color-text-secondary)',
+    backgroundColor: '#F3F4F6',
+    padding: '3px 8px',
+    borderRadius: '6px',
+    fontFamily: 'monospace',
   },
   productTitle: {
-    fontSize: '36px',
+    fontSize: '28px',
     fontWeight: '800',
     color: 'var(--color-text)',
-    lineHeight: '1.1',
+    lineHeight: '1.3',
     marginBottom: '12px',
   },
   brandRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-    marginBottom: '20px',
-    flexWrap: 'wrap',
+    gap: '12px',
+    marginBottom: '18px',
   },
   brandLabel: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: 'var(--color-text-secondary)',
   },
   divider: {
-    color: 'var(--color-border)',
+    color: '#D0D5DD',
   },
   reviewsRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '6px',
   },
   stars: {
     display: 'flex',
     gap: '2px',
   },
   reviewsText: {
-    fontSize: '13px',
+    fontSize: '12.5px',
     color: 'var(--color-text-secondary)',
-    fontWeight: '600',
   },
   priceRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'var(--color-primary-light)',
-    padding: '16px 24px',
-    borderRadius: '16px',
-    marginBottom: '24px',
+    marginBottom: '16px',
+    padding: '12px 16px',
+    backgroundColor: '#F9FAFB',
+    borderRadius: '14px',
   },
   priceColumn: {
     display: 'flex',
     alignItems: 'baseline',
-    gap: '12px',
+    gap: '10px',
   },
   currentPrice: {
-    fontSize: '28px',
+    fontSize: '26px',
     fontWeight: '800',
-    color: 'var(--color-primary-dark)',
+    color: 'var(--color-text)',
+  },
+  currSmall: {
+    fontSize: '15px',
+    color: 'var(--color-text-secondary)',
   },
   originalPrice: {
-    fontSize: '16px',
+    fontSize: '15px',
     color: 'var(--color-text-secondary)',
     textDecoration: 'line-through',
   },
   unitBadge: {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: '700',
+    color: 'var(--color-text-secondary)',
     backgroundColor: '#FFFFFF',
+    padding: '4px 10px',
+    borderRadius: '8px',
+    border: '1px solid var(--color-border)',
+  },
+  tagsContainer: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+    marginBottom: '16px',
+  },
+  tagPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '11px',
+    fontWeight: '700',
     color: 'var(--color-primary-dark)',
-    padding: '6px 14px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+    backgroundColor: 'var(--color-primary-light)',
+    padding: '4px 10px',
+    borderRadius: '20px',
+    textTransform: 'capitalize',
   },
   description: {
-    fontSize: '14px',
-    color: 'var(--color-text-secondary)',
+    fontSize: '14.5px',
     lineHeight: '1.6',
+    color: 'var(--color-text-secondary)',
+    marginBottom: '20px',
+  },
+  availabilityBox: {
+    backgroundColor: '#F8FAF9',
+    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    padding: '12px 16px',
     marginBottom: '24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
   },
   stockStatus: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '32px',
   },
   dot: {
     width: '8px',
@@ -426,142 +663,175 @@ const styles = {
   stockText: {
     fontSize: '13px',
     fontWeight: '700',
+    color: 'var(--color-text)',
+  },
+  branchNotice: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '12px',
     color: 'var(--color-text-secondary)',
   },
   actionBlock: {
     display: 'flex',
-    gap: '16px',
-    marginBottom: '40px',
-    flexWrap: 'wrap',
+    gap: '12px',
+    marginBottom: '28px',
+    alignItems: 'center',
   },
   qtyControl: {
     display: 'flex',
     alignItems: 'center',
-    border: '1.5px solid var(--color-border)',
+    backgroundColor: '#F3F4F6',
     borderRadius: '12px',
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
+    padding: '4px',
   },
   qtyBtn: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
     border: 'none',
-    background: 'none',
-    width: '44px',
-    height: '44px',
+    backgroundColor: '#FFFFFF',
+    color: 'var(--color-text)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    color: 'var(--color-text)',
-    transition: 'background-color 0.2s',
-    '&:hover': {
-      backgroundColor: 'var(--color-border)',
-    },
   },
   qtyVal: {
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: '700',
-    color: 'var(--color-text)',
-    width: '32px',
+    width: '36px',
     textAlign: 'center',
   },
   addToCartBtn: {
     flexGrow: 1,
-    height: '46px',
-    borderRadius: '12px',
+    padding: '14px 20px',
+    borderRadius: '14px',
+    fontSize: '14px',
+    fontWeight: '700',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    fontSize: '15px',
-    fontWeight: '700',
-    cursor: 'pointer',
   },
-  wishlistBtn: {
-    width: '46px',
-    height: '46px',
-    borderRadius: '12px',
+  wishlistActionBtn: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '14px',
     border: '1.5px solid var(--color-border)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    transition: 'all 0.2s',
   },
-  tabsWrapper: {
+  shareBtn: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '14px',
     border: '1.5px solid var(--color-border)',
-    borderRadius: '16px',
-    overflow: 'hidden',
     backgroundColor: '#FFFFFF',
-  },
-  tabsHeader: {
-    display: 'flex',
-    backgroundColor: '#FAFBFB',
-    borderBottom: '1.5px solid var(--color-border)',
-  },
-  tabLink: {
-    flex: 1,
-    background: 'none',
-    border: 'none',
-    borderBottom: '2.5px solid transparent',
-    padding: '12px 16px',
-    fontSize: '13px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    textAlign: 'center',
-  },
-  tabContent: {
-    padding: '20px',
-  },
-  tabPane: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  tabIconLine: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  guaranteeGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '16px',
+    borderTop: '1px solid var(--color-border)',
+    paddingTop: '20px',
+  },
+  guaranteeItem: {
+    display: 'flex',
+    gap: '10px',
+    alignItems: 'flex-start',
+  },
+  gTitle: {
     fontSize: '13px',
+    fontWeight: '700',
+    color: 'var(--color-text)',
+    marginBottom: '2px',
+  },
+  gDesc: {
+    fontSize: '11px',
     color: 'var(--color-text-secondary)',
-    lineHeight: '1.4',
+  },
+  tabsSection: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '24px',
+    border: '1px solid var(--color-border)',
+    overflow: 'hidden',
+    marginBottom: '48px',
+  },
+  tabHeaders: {
+    display: 'flex',
+    borderBottom: '1px solid var(--color-border)',
+    backgroundColor: '#F9FAFB',
+  },
+  tabBtn: {
+    padding: '16px 24px',
+    fontSize: '14px',
+    fontWeight: '700',
+    border: 'none',
+    borderBottom: '2.5px solid transparent',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+  },
+  tabBody: {
+    padding: '24px 32px',
+  },
+  specTable: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  specRow: {
+    display: 'flex',
+    padding: '10px 0',
+    borderBottom: '1px solid #F3F4F6',
+  },
+  specLabel: {
+    width: '180px',
+    fontSize: '13.5px',
+    fontWeight: '600',
+    color: 'var(--color-text-secondary)',
+  },
+  specVal: {
+    fontSize: '13.5px',
+    color: 'var(--color-text)',
+    fontWeight: '600',
+  },
+  deliveryContent: {
+    padding: '8px 0',
   },
   relatedSection: {
-    borderTop: '1px solid var(--color-border)',
-    paddingTop: '48px',
+    marginTop: '32px',
   },
   relatedHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '24px',
+    marginBottom: '20px',
   },
   relatedTitle: {
-    fontSize: '22px',
+    fontSize: '20px',
     fontWeight: '800',
     color: 'var(--color-text)',
   },
-  moreBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'var(--color-primary-dark)',
-    fontSize: '14px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    display: 'flex',
+  viewCategoryLink: {
+    display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
+    fontSize: '13px',
+    fontWeight: '700',
+    color: 'var(--color-primary-dark)',
+    textDecoration: 'none',
   },
   relatedGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '20px',
-    '@media (max-width: 1024px)': {
-      gridTemplateColumns: 'repeat(2, 1fr)',
-    },
-    '@media (max-width: 600px)': {
-      gridTemplateColumns: '1fr',
-    },
   },
 };
+
 export default ProductDetail;

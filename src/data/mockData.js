@@ -1,511 +1,197 @@
-// Freshio Kigali Mock Database - Fully Localized Rwanda Dataset
+// Freshio Kigali Mock Database - Localized Rwanda Sawa Citi Products Dataset
+import PRODUCTS_DATA from './products.json';
 
 export const CATEGORIES = [
   {
-    id: 'fruits-vegetables',
-    name: 'Fresh Produce',
-    slug: 'fruits-vegetables',
-    itemCount: '300+ Items',
-    color: '#FEF1C9', // Yellowish circle theme matching image
+    id: 'groceries',
+    categoryId: 1,
+    name: 'Groceries',
+    slug: 'groceries',
+    emoji: '🛒',
+    itemCount: '1,834 Items',
+    totalCount: 1834,
+    color: '#FEF1C9',
     borderColor: '#FBEAD2',
-    description: 'Fresh vegetables and local fruits harvested from Musanze and Rulindo hills.'
+    description: 'Pantry staples, grains, breakfast cereals, spices, pasta, sauces and daily food essentials.'
   },
   {
-    id: 'dairy-eggs',
-    name: 'Dairy & Eggs',
-    slug: 'dairy-eggs',
-    itemCount: '150+ Items',
-    color: '#E1F7F5', // Light blue/cyan circle theme
-    borderColor: '#CBEBE8',
-    description: 'Inyange fresh milk, Masaka yogurts, and local farm-fresh eggs.'
+    id: 'fresh-produce',
+    categoryId: 2,
+    name: 'Fresh Produce',
+    slug: 'fresh-produce',
+    emoji: '🥬',
+    itemCount: '209 Items',
+    totalCount: 209,
+    color: '#EAF8F0',
+    borderColor: '#CDEEDD',
+    description: 'Fresh vegetables, herbs, and local fruits harvested from Musanze, Rulindo, and Rwamagana groves.'
   },
   {
-    id: 'bakery',
-    name: 'Bakery',
-    slug: 'bakery',
-    itemCount: '120+ Items',
-    color: '#FFF0D4', // Warm gold/orange circle theme
-    borderColor: '#F9E2D2',
-    description: 'Artisanal breads, baguettes, and sweet pastries baked fresh in Kigali.'
-  },
-  {
-    id: 'meat-seafood',
+    id: 'meat-fish',
+    categoryId: 3,
     name: 'Meat & Fish',
     slug: 'meat-fish',
-    itemCount: '180+ Items',
-    color: '#FFEAF2', // Pink/red circle theme
+    emoji: '🍗',
+    itemCount: '113 Items',
+    totalCount: 113,
+    color: '#FFEAF2',
     borderColor: '#FCDAD7',
-    description: 'Nyamata premium beef cuts and fresh Lake Kivu Tilapia.'
+    description: 'Fresh local beef cuts, sausages, poultry, and fresh Lake Kivu Tilapia fish.'
   },
   {
     id: 'beverages',
+    categoryId: 4,
     name: 'Beverages',
     slug: 'beverages',
-    itemCount: '200+ Items',
-    color: '#EBFCEE', // Green circle theme
+    emoji: '🥤',
+    itemCount: '537 Items',
+    totalCount: 537,
+    color: '#EBFCEE',
     borderColor: '#DFE7FB',
-    description: 'Inyange juices, local ginger tea, Huye Mountain coffee, and water.'
+    description: 'Inyange fruit juices, local Rwandan teas, Huye Mountain coffee, carbonated drinks, and mineral water.'
+  },
+  {
+    id: 'wines-spirits',
+    categoryId: 5,
+    name: 'Wines & Spirits',
+    slug: 'wines-spirits',
+    emoji: '🍷',
+    itemCount: '418 Items',
+    totalCount: 418,
+    color: '#F7EEF8',
+    borderColor: '#EAD7EC',
+    description: 'Fine red & white wines, whiskies, cognacs, gins, champagnes, local beers, and imported spirits.'
   },
   {
     id: 'snacks',
-    name: 'Snacks',
+    categoryId: 6,
+    name: 'Snacks & Sweets',
     slug: 'snacks',
-    itemCount: '250+ Items',
-    color: '#FFF4EA', // Light orange/yellow circle theme
+    emoji: '🍫',
+    itemCount: '230 Items',
+    totalCount: 230,
+    color: '#FFF4EA',
     borderColor: '#FADFCF',
-    description: 'Sina Gerard biscuits, roasted macadamia nuts, and local dark chocolates.'
+    description: 'Potato crisps, savory chips, gourmet chocolates, sweet biscuits, wafers, and roasted nuts.'
   },
   {
-    id: 'pantry',
-    name: 'Pantry',
-    slug: 'pantry',
-    itemCount: '400+ Items',
-    color: '#EDF8F5', // Mint green circle theme
-    borderColor: '#EAE2D5',
-    description: 'Bugarama local rice, Nyungwe forest honey, and Akabanga chili oil.'
+    id: 'dairy',
+    categoryId: 7,
+    name: 'Dairy & Frozen',
+    slug: 'dairy',
+    emoji: '🧀',
+    itemCount: '273 Items',
+    totalCount: 273,
+    color: '#E1F7F5',
+    borderColor: '#CBEBE8',
+    description: 'Inyange fresh milk, Masaka yogurts, artisanal cheeses, butter, and quick frozen foods.'
   },
   {
     id: 'household',
+    categoryId: 8,
     name: 'Household',
     slug: 'household',
-    itemCount: '300+ Items',
-    color: '#EBF5FB', // Cool blue circle theme
+    emoji: '🧺',
+    itemCount: '474 Items',
+    totalCount: 474,
+    color: '#EBF5FB',
     borderColor: '#D2EDE9',
-    description: 'Sulfo cleaning detergents, bamboo paper rolls, and matches.'
+    description: 'Sulfo detergents, cleaning soaps, dishwashers, laundry supplies, insect repellents, and paper rolls.'
   },
   {
-    id: 'personal-care',
-    name: 'Personal Care',
-    slug: 'personal-care',
-    itemCount: '250+ Items',
-    color: '#FDEDEC', // Soft red/pink circle theme
+    id: 'beauty',
+    categoryId: 9,
+    name: 'Beauty & Care',
+    slug: 'beauty',
+    emoji: '💄',
+    itemCount: '401 Items',
+    totalCount: 401,
+    color: '#FDEDEC',
     borderColor: '#FCD7DF',
-    description: 'Sulfo body soaps, natural glycerine, and organic shea butter tubs.'
+    description: 'Personal hygiene soaps, shampoos, skincare lotions, deodorants, perfumes, and grooming items.'
   },
   {
-    id: 'baby-care',
-    name: 'Baby Care',
-    slug: 'baby-care',
-    itemCount: '180+ Items',
-    color: '#FEF9E7', // Cream yellow circle theme
+    id: 'baby',
+    categoryId: 10,
+    name: 'Baby & Kids',
+    slug: 'baby',
+    emoji: '🍼',
+    itemCount: '100 Items',
+    totalCount: 100,
+    color: '#FEF9E7',
     borderColor: '#FBEAD2',
-    description: 'Hypoallergenic baby formula, diapers, and baby powder from Inyange.'
+    description: 'Nutritional baby formulas, gentle cereals, diapers, wet wipes, and infant care essentials.'
+  },
+  {
+    id: 'kitchen',
+    categoryId: 11,
+    name: 'Home & Kitchen',
+    slug: 'kitchen',
+    emoji: '🍽️',
+    itemCount: '96 Items',
+    totalCount: 96,
+    color: '#F4F6F8',
+    borderColor: '#DFE3E8',
+    description: 'Cookware, food containers, kitchen utensils, tableware, napkins, and dining accessories.'
+  },
+  {
+    id: 'electronics',
+    categoryId: 12,
+    name: 'Electronics',
+    slug: 'electronics',
+    emoji: '🔌',
+    itemCount: '9 Items',
+    totalCount: 9,
+    color: '#EEF2FF',
+    borderColor: '#D9E2FC',
+    description: 'Batteries, chargers, cables, extension sockets, and portable home electronic essentials.'
   }
 ];
 
-export const PRODUCTS = [
-  // FRESH PRODUCE
-  {
-    id: 'p1',
-    name: 'Organic Hass Avocados',
-    category: 'Fresh Produce',
-    subcategory: 'Fruits',
-    description: 'Rich and buttery organic avocados harvested from orchards in Musanze. Perfect for breakfast toast or local salads.',
-    price: 1200,
-    originalPrice: 1600,
-    discount: 25,
-    rating: 4.8,
-    reviews: 124,
-    unit: 'pack of 2',
-    image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=600&q=80',
-    brand: 'Musanze Organic',
-    stock: 25,
-    isFeatured: true,
-    isDeal: true
-  },
-  {
-    id: 'p2',
-    name: 'Sweet Organic Bananas (Kamaramasenge)',
-    category: 'Fresh Produce',
-    subcategory: 'Fruits',
-    description: 'Sun-ripened, highly aromatic sweet local bananas sourced from Rwamagana groves. Plump and naturally sweet.',
-    price: 800,
-    originalPrice: 1000,
-    discount: 20,
-    rating: 4.7,
-    reviews: 86,
-    unit: 'bunch (approx 1kg)',
-    image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80',
-    brand: 'Rwamagana Groves',
-    stock: 45,
-    isFeatured: true,
-    isDeal: true
-  },
-  {
-    id: 'p3',
-    name: 'Cherry Tomatoes on the Vine',
-    category: 'Fresh Produce',
-    subcategory: 'Vegetables',
-    description: 'Juicy, vine-ripened local cherry tomatoes grown in Rulindo greenhouses. Crisp skin and sweet flesh.',
-    price: 1500,
-    originalPrice: 1800,
-    discount: 16,
-    rating: 4.6,
-    reviews: 48,
-    unit: '250g pack',
-    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80',
-    brand: 'Rulindo Greenhouse',
-    stock: 18,
-    isFeatured: true,
-    isDeal: false
-  },
-  {
-    id: 'p4',
-    name: 'Musanze Irish Potatoes (Kinigi)',
-    category: 'Fresh Produce',
-    subcategory: 'Vegetables',
-    description: 'Authentic Kinigi Irish potatoes from the rich volcanic soil of Musanze. Perfect texture for boiling, mashing, or chips.',
-    price: 1400,
-    originalPrice: 1800,
-    discount: 22,
-    rating: 4.9,
-    reviews: 142,
-    unit: '2kg bag',
-    image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80',
-    brand: 'Musanze Harvest',
-    stock: 50,
-    isFeatured: true,
-    isDeal: true
-  },
-  {
-    id: 'p5',
-    name: 'Igitoki (Green Cooking Bananas)',
-    category: 'Fresh Produce',
-    subcategory: 'Vegetables',
-    description: 'Freshly harvested green cooking bananas from Gakenke. The staple ingredient for traditional Rwandan plantain stews.',
-    price: 900,
-    originalPrice: 1200,
-    discount: 25,
-    rating: 4.8,
-    reviews: 67,
-    unit: '1kg bunch',
-    image: 'https://images.unsplash.com/photo-1566393028639-d108a42c46a7?auto=format&fit=crop&w=600&q=80',
-    brand: 'Gakenke Farms',
-    stock: 35,
-    isFeatured: false,
-    isDeal: false
-  },
-  {
-    id: 'p6',
-    name: 'Local Tree Tomatoes (Tamarillo)',
-    category: 'Fresh Produce',
-    subcategory: 'Fruits',
-    description: 'Fresh, tangy, and red local tree tomatoes (Ibinyomoro) grown in Northern Province. Excellent for fresh juices.',
-    price: 1800,
-    originalPrice: 2200,
-    discount: 18,
-    rating: 4.7,
-    reviews: 53,
-    unit: '1kg pack',
-    image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=600&q=80',
-    brand: 'Rulindo Farms',
-    stock: 22,
-    isFeatured: true,
-    isDeal: false
-  },
+// Slugs compatibility alias map for legacy URLs
+export const CATEGORY_ALIASES = {
+  'fruits-vegetables': 'fresh-produce',
+  'dairy-eggs': 'dairy',
+  'bakery': 'groceries',
+  'meat-seafood': 'meat-fish',
+  'pantry': 'groceries',
+  'personal-care': 'beauty',
+  'baby-care': 'baby'
+};
 
-  // DAIRY & EGGS
-  {
-    id: 'p9',
-    name: 'Inyange Fresh Whole Milk 1L',
-    category: 'Dairy & Eggs',
-    subcategory: 'Milk',
-    description: '100% pure pasteurized fresh milk from Inyange Industries. Rich in calcium and vitamins, Kigali\'s favorite brand.',
-    price: 1100,
-    originalPrice: 1300,
-    discount: 15,
-    rating: 4.9,
-    reviews: 218,
-    unit: '1L bottle',
-    image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80',
-    brand: 'Inyange Industries',
-    stock: 40,
-    isFeatured: true,
-    isDeal: false
-  },
-  {
-    id: 'p10',
-    name: 'Masaka Strawberry Yogurt 250ml',
-    category: 'Dairy & Eggs',
-    subcategory: 'Yogurt',
-    description: 'Thick, creamy strawberry drinking yogurt produced locally by Masaka Creamery. High-quality standards.',
-    price: 900,
-    originalPrice: 1100,
-    discount: 18,
-    rating: 4.8,
-    reviews: 95,
-    unit: '250ml cup',
-    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80',
-    brand: 'Masaka Creamery',
-    stock: 30,
-    isFeatured: false,
-    isDeal: true
-  },
-  {
-    id: 'p11',
-    name: 'Gishwati Salted Butter',
-    category: 'Dairy & Eggs',
-    subcategory: 'Butter',
-    description: 'Rich and creamy salted butter churned from milk sourced from Gishwati forest pastures. Deep golden color.',
-    price: 3500,
-    originalPrice: 4000,
-    discount: 12,
-    rating: 4.7,
-    reviews: 79,
-    unit: '250g block',
-    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=600&q=80',
-    brand: 'Gishwati Dairy',
-    stock: 20,
-    isFeatured: false,
-    isDeal: false
-  },
-  {
-    id: 'p12',
-    name: 'Local Free-Range Farm Eggs',
-    category: 'Dairy & Eggs',
-    subcategory: 'Eggs',
-    description: 'Fresh local farm eggs from free-roaming chickens raised in Bugesera. Large size, yellow yolks.',
-    price: 2200,
-    originalPrice: 2600,
-    discount: 15,
-    rating: 4.8,
-    reviews: 114,
-    unit: 'carton of 12',
-    image: 'https://images.unsplash.com/photo-1516448620398-c5f44bf9f441?auto=format&fit=crop&w=600&q=80',
-    brand: 'Bugesera Farm',
-    stock: 25,
-    isFeatured: true,
-    isDeal: true
-  },
+// All 4,694 products from sawa_citi_products 2.xlsx
+export const PRODUCTS = PRODUCTS_DATA;
 
-  // MEAT & FISH
-  {
-    id: 'p14',
-    name: 'Nyamata Premium Ground Beef',
-    category: 'Meat & Fish',
-    subcategory: 'Meat',
-    description: 'Freshly minced grass-fed lean beef sourced from cattle farms in Nyamata. Tender, juicy, and hormone-free.',
-    price: 4500,
-    originalPrice: 5000,
-    discount: 10,
-    rating: 4.8,
-    reviews: 132,
-    unit: '500g pack',
-    image: 'https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=600&q=80',
-    brand: 'Nyamata Beef',
-    stock: 15,
-    isFeatured: false,
-    isDeal: false
-  },
-  {
-    id: 'p15',
-    name: 'Fresh Lake Kivu Tilapia Fillet',
-    category: 'Meat & Fish',
-    subcategory: 'Seafood',
-    description: 'Fresh Tilapia fillets sourced directly from Lake Kivu fishermen. Cleaned, scaled, skinless, ready for cooking.',
-    price: 6500,
-    originalPrice: 7500,
-    discount: 13,
-    rating: 4.9,
-    reviews: 90,
-    unit: '500g pack',
-    image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80',
-    brand: 'Lake Kivu Catch',
-    stock: 12,
-    isFeatured: true,
-    isDeal: false
-  },
+// Helper to look up a product by ID, SKU, or Slug
+export const findProduct = (identifier) => {
+  if (!identifier) return null;
+  const strId = String(identifier).trim().toLowerCase();
+  return (
+    PRODUCTS.find(p => p.id === strId) ||
+    PRODUCTS.find(p => p.sku && p.sku.toLowerCase() === strId) ||
+    PRODUCTS.find(p => p.slug && p.slug.toLowerCase() === strId) ||
+    null
+  );
+};
 
-  // BAKERY
-  {
-    id: 'p17',
-    name: 'Artisanal French Crusty Baguette',
-    category: 'Bakery',
-    subcategory: 'Bread',
-    description: 'Freshly baked using traditional methods, featuring a crunchy golden crust and light, airy interior. Kigali\'s breakfast favorite.',
-    price: 1000,
-    originalPrice: 1200,
-    discount: 16,
-    rating: 4.8,
-    reviews: 84,
-    unit: '1 unit',
-    image: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=600&q=80',
-    brand: 'Kigali French Bakery',
-    stock: 20,
-    isFeatured: true,
-    isDeal: false
-  },
-  {
-    id: 'p18',
-    name: 'Masaka Butter Croissants',
-    category: 'Bakery',
-    subcategory: 'Pastries',
-    description: 'Crispy flaky French puff pastries baked with premium Masaka creamery butter. Buttery, soft layers.',
-    price: 3600,
-    originalPrice: 4500,
-    discount: 20,
-    rating: 4.8,
-    reviews: 73,
-    unit: 'pack of 3',
-    image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80',
-    brand: 'Kigali French Bakery',
-    stock: 10,
-    isFeatured: true,
-    isDeal: true
-  },
-
-  // BEVERAGES
-  {
-    id: 'p20',
-    name: 'Inyange Passion Fruit Juice 1L',
-    category: 'Beverages',
-    subcategory: 'Juices',
-    description: '100% fresh passion fruit juice manufactured by Inyange. Refreshing local taste, packed with vitamin C.',
-    price: 2200,
-    originalPrice: 2600,
-    discount: 15,
-    rating: 4.7,
-    reviews: 62,
-    unit: '1L carton',
-    image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=600&q=80',
-    brand: 'Inyange Industries',
-    stock: 15,
-    isFeatured: true,
-    isDeal: false
-  },
-  {
-    id: 'p21',
-    name: 'Huye Mountain Bourbon Coffee Ground',
-    category: 'Beverages',
-    subcategory: 'Coffee',
-    description: 'Award-winning Bourbon Arabica coffee grown on Huye Mountain slopes. Rich medium roast, hints of chocolate and sweet berries.',
-    price: 7500,
-    originalPrice: 9000,
-    discount: 16,
-    rating: 4.9,
-    reviews: 154,
-    unit: '250g pack',
-    image: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80',
-    brand: 'Huye Mountain Coffee',
-    stock: 20,
-    isFeatured: true,
-    isDeal: true
-  },
-
-  // PANTRY & SNACKS
-  {
-    id: 'p26',
-    name: 'Akabanga Chili Oil 100ml',
-    category: 'Pantry',
-    subcategory: 'Condiments',
-    description: 'The famous Rwandan hot chili oil dropper from Sina Gerard. Extremely spicy, adds a unique aromatic heat to any meal.',
-    price: 2000,
-    originalPrice: 2500,
-    discount: 20,
-    rating: 4.9,
-    reviews: 320,
-    unit: '100ml dropper bottle',
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80',
-    brand: 'Sina Gerard (Urwibutso)',
-    stock: 60,
-    isFeatured: true,
-    isDeal: true
-  },
-  {
-    id: 'p27',
-    name: 'Nyungwe Wild Forest Honey',
-    category: 'Pantry',
-    subcategory: 'Sweeteners',
-    description: '100% raw, organic wildflower honey harvested sustainably from the boundaries of Nyungwe Forest national park.',
-    price: 3800,
-    originalPrice: 4500,
-    discount: 15,
-    rating: 4.8,
-    reviews: 148,
-    unit: '500g jar',
-    image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80',
-    brand: 'Nyungwe Beekeepers',
-    stock: 25,
-    isFeatured: true,
-    isDeal: false
-  },
-  {
-    id: 'p28',
-    name: 'Sina Gerard Urwibutso Ginger Biscuits',
-    category: 'Snacks',
-    subcategory: 'Biscuits',
-    description: 'Crisp, spicy ginger biscuits made from local wheat and ginger. Kigali\'s absolute favorite tea time companion.',
-    price: 1500,
-    originalPrice: 1800,
-    discount: 16,
-    rating: 4.6,
-    reviews: 82,
-    unit: '300g family pack',
-    image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bb087?auto=format&fit=crop&w=600&q=80',
-    brand: 'Sina Gerard (Urwibutso)',
-    stock: 40,
-    isFeatured: false,
-    isDeal: false
-  },
-
-  // HOUSEHOLD & PERSONAL CARE
-  {
-    id: 'p31',
-    name: 'Sulfo Tembo Bar Soap 1kg',
-    category: 'Personal Care',
-    subcategory: 'Hygiene',
-    description: 'Traditional multi-purpose cleaning and bathing soap manufactured in Kigali by Sulfo Rwanda. Gentle and long-lasting.',
-    price: 1500,
-    originalPrice: 1800,
-    discount: 16,
-    rating: 4.5,
-    reviews: 104,
-    unit: '1kg bar block',
-    image: 'https://images.unsplash.com/photo-1608248597481-496100c80836?auto=format&fit=crop&w=600&q=80',
-    brand: 'Sulfo Rwanda',
-    stock: 50,
-    isFeatured: false,
-    isDeal: false
-  },
-
-  // BABY CARE
-  {
-    id: 'p33',
-    name: 'Inyange Premium Baby Formula',
-    category: 'Baby Care',
-    subcategory: 'Nutrition',
-    description: 'Gentle baby formula milk powder fortified with vitamins and minerals, produced locally by Inyange Dairy division.',
-    price: 9500,
-    originalPrice: 11000,
-    discount: 13,
-    rating: 4.8,
-    reviews: 42,
-    unit: '400g can',
-    image: 'https://images.unsplash.com/photo-1522850959074-b78b5f31ffc6?auto=format&fit=crop&w=600&q=80',
-    brand: 'Inyange Industries',
-    stock: 15,
-    isFeatured: true,
-    isDeal: false
-  }
-];
-
+// Store locations in Kigali
 export const STORES = [
   {
     id: 's1',
-    name: 'Freshio Kigali Heights',
+    name: 'Sawa Citi Kigali Heights',
     address: 'Kigali Heights Building, Ground Floor, KG 7 Ave, Kimihurura, Kigali',
     hours: '08:00 AM - 10:00 PM',
     phone: '+250 788 310 120',
     lat: -1.9542,
     lng: 30.0934,
     distance: '2.4 km away',
-    services: ['Delivery', 'Pickup', 'Parking', 'Organic Cafe'],
-    description: 'Our flagship store inside Kigali Heights. Features an Inyange fresh juice bar, local organic produce stands, and Gishwati cheese corner.',
+    services: ['Delivery', 'Pickup', 'Parking', 'Bakery & Deli'],
+    description: 'Our flagship store inside Kigali Heights. Features fresh deli, local organic produce stands, and imported delicacies.',
     image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 's2',
-    name: 'Freshio Downtown Kiyovu',
+    name: 'Sawa Citi Downtown Kiyovu',
     address: 'Kigali Downtown Mall, Block A, KN 3 Rd, Kiyovu, Kigali',
     hours: '07:30 AM - 11:00 PM',
     phone: '+250 789 440 220',
@@ -513,12 +199,12 @@ export const STORES = [
     lng: 30.0618,
     distance: '4.1 km away',
     services: ['Delivery', 'Pickup', 'Parking'],
-    description: 'Perfect shopping location in the heart of CBD, carrying fresh Lake Kivu catches and premium Nyamata beef blocks.',
+    description: 'Central shopping location in the heart of CBD, carrying fresh butchery cuts and everyday pantry supplies.',
     image: 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 's3',
-    name: 'Freshio Nyarutarama Heights',
+    name: 'Sawa Citi Nyarutarama',
     address: 'MTN Center Mall area, KG 9 Ave, Nyarutarama, Kigali',
     hours: '08:00 AM - 10:00 PM',
     phone: '+250 788 600 500',
@@ -526,12 +212,12 @@ export const STORES = [
     lng: 30.0998,
     distance: '6.8 km away',
     services: ['Delivery', 'Parking', 'EV Charging'],
-    description: 'Premium boutique supermarket stocking organic imports, local gourmet Gishwati butter, and organic wellness lines.',
+    description: 'Premium supermarket stocking fine wines & spirits, organic imports, and gourmet bakery goods.',
     image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 's4',
-    name: 'Freshio Gishushu Express',
+    name: 'Sawa Citi Gishushu Express',
     address: 'Gishushu Junction, Near Parliament Road, KG 12 Ave, Kigali',
     hours: '06:00 AM - Midnight',
     phone: '+250 788 120 440',
@@ -548,7 +234,7 @@ export const FAQS = [
   {
     id: 'faq1',
     question: 'How does Kigali delivery work?',
-    answer: 'Once you place your order, our professional shoppers select products directly from our shelves. Items are packed in temperature-controlled bags and delivered to your doorstep in under 2 hours via our Kigali courier fleet.'
+    answer: 'Once you place your order, our professional shoppers select products directly from our shelves across Sawa Citi branches. Items are packed in temperature-controlled bags and delivered to your doorstep in under 2 hours via our Kigali courier fleet.'
   },
   {
     id: 'faq2',
@@ -563,9 +249,9 @@ export const FAQS = [
   {
     id: 'faq4',
     question: 'What is the Freshio+ Kigali program?',
-    answer: 'Freshio+ Kigali is our loyalty subscription. For 2,999 RWF/month, members receive unlimited free delivery on all orders above 15,000 RWF, early access to new Gishwati cheese rollouts, and double reward points.'
+    answer: 'Freshio+ Kigali is our loyalty subscription. For 2,999 RWF/month, members receive unlimited free delivery on all orders above 15,000 RWF, early access to new rollouts, and double reward points.'
   }
 ];
 
-export const RECENT_SEARCHES = ['Inyange Milk', 'Akabanga', 'Musanze Potatoes'];
-export const POPULAR_SEARCHES = ['Fresh vegetables', 'Yogurt', 'Snacks', 'Lake Tilapia'];
+export const RECENT_SEARCHES = ['Everyday Cornflakes', 'Azam Wheat Flour', 'Inyange Milk', 'Sulfo Soap', 'Passion Fruits'];
+export const POPULAR_SEARCHES = ['Cornflakes', 'Flour', 'Juice', 'Wine', 'Fresh Fruits', 'Snacks'];

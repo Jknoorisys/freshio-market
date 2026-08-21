@@ -1,27 +1,86 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES, PRODUCTS } from '../data/mockData';
-import { Filter, SlidersHorizontal, Search, RotateCcw } from 'lucide-react';
+import { 
+  Filter, 
+  Search, 
+  RotateCcw, 
+  ChevronLeft, 
+  ChevronRight, 
+  Tag, 
+  SlidersHorizontal,
+  X
+} from 'lucide-react';
+
+const ITEMS_PER_PAGE = 32;
 
 export const Shop = () => {
   const { addToast } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
   
+  // Read initial query params from URL
+  const initialCategory = searchParams.get('category') || 'all';
+  const initialSearch = searchParams.get('search') || '';
+  const initialTag = searchParams.get('tag') || 'all';
+
   // --- STATE FOR FILTERS ---
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [priceRange, setPriceRange] = useState(15000); // Max: 15,000 RWF
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedTag, setSelectedTag] = useState(initialTag);
+  const [priceRange, setPriceRange] = useState(150000); // 150,000 RWF default max
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [sortBy, setSortBy] = useState('popular');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Extract all unique brands dynamically
+  // Sync state if URL query params change
+  useEffect(() => {
+    if (searchParams.get('search') !== null) {
+      setSearchQuery(searchParams.get('search'));
+    }
+    if (searchParams.get('category')) {
+      setSelectedCategory(searchParams.get('category'));
+    }
+    if (searchParams.get('tag')) {
+      setSelectedTag(searchParams.get('tag'));
+    }
+  }, [searchParams]);
+
+  // Extract top tags dynamically from products
+  const popularTags = useMemo(() => {
+    return [
+      'bestseller', 
+      'pantry', 
+      'breakfast', 
+      'imported', 
+      'fresh', 
+      'local', 
+      'healthy', 
+      'chilled', 
+      'family-size', 
+      'spicy', 
+      'deal'
+    ];
+  }, []);
+
+  // Extract top brands
   const allBrands = useMemo(() => {
-    const brands = PRODUCTS.map(p => p.brand).filter(Boolean);
-    return [...new Set(brands)];
+    const counts = {};
+    PRODUCTS.forEach(p => {
+      if (p.brand && p.brand !== 'Sawa Citi') {
+        counts[p.brand] = (counts[p.brand] || 0) + 1;
+      }
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 30)
+      .map(([brand]) => brand);
   }, []);
 
   const handleBrandChange = (brand) => {
+    setCurrentPage(1);
     if (selectedBrands.includes(brand)) {
       setSelectedBrands(prev => prev.filter(b => b !== brand));
     } else {
@@ -29,12 +88,32 @@ export const Shop = () => {
     }
   };
 
+  const handleCategorySelect = (slug) => {
+    setSelectedCategory(slug);
+    setCurrentPage(1);
+    const newParams = new URLSearchParams(searchParams);
+    if (slug === 'all') {
+      newParams.delete('category');
+    } else {
+      newParams.set('category', slug);
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleTagSelect = (tag) => {
+    setSelectedTag(tag);
+    setCurrentPage(1);
+  };
+
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
-    setPriceRange(15000);
+    setSelectedTag('all');
+    setPriceRange(150000);
     setSelectedBrands([]);
     setSortBy('popular');
+    setCurrentPage(1);
+    setSearchParams({});
     addToast('Filters reset successfully', 'info');
   };
 
@@ -44,52 +123,80 @@ export const Shop = () => {
 
     // 1. Category Filter
     if (selectedCategory !== 'all') {
-      const catObj = CATEGORIES.find(c => c.slug === selectedCategory);
-      if (catObj) {
-        result = result.filter(p => p.category.toLowerCase() === catObj.name.toLowerCase());
-      }
-    }
-
-    // 2. Search Filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
       result = result.filter(p => 
-        p.name.toLowerCase().includes(q) || 
-        p.brand.toLowerCase().includes(q) || 
-        p.category.toLowerCase().includes(q)
+        p.categorySlug === selectedCategory || 
+        (p.category && p.category.toLowerCase() === selectedCategory.toLowerCase())
       );
     }
 
-    // 3. Price Filter
-    result = result.filter(p => p.price <= priceRange);
+    // 2. Tag Filter
+    if (selectedTag !== 'all') {
+      result = result.filter(p => Array.isArray(p.tags) && p.tags.includes(selectedTag));
+    }
 
-    // 4. Brand Filter
+    // 3. Search Filter (matches name, SKU, brand, category, tags)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        (p.sku && p.sku.toLowerCase().includes(q)) || 
+        (p.brand && p.brand.toLowerCase().includes(q)) || 
+        (p.category && p.category.toLowerCase().includes(q)) ||
+        (Array.isArray(p.tags) && p.tags.some(t => t.toLowerCase().includes(q))) ||
+        (p.description && p.description.toLowerCase().includes(q))
+      );
+    }
+
+    // 4. Price Filter
+    if (priceRange < 150000) {
+      result = result.filter(p => (p.price || 0) <= priceRange);
+    }
+
+    // 5. Brand Filter
     if (selectedBrands.length > 0) {
       result = result.filter(p => selectedBrands.includes(p.brand));
     }
 
-    // 5. Sorting
+    // 6. Sorting
     switch (sortBy) {
       case 'price-low':
-        result.sort((a, b) => a.price - b.price);
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
         break;
       case 'price-high':
-        result.sort((a, b) => b.price - a.price);
+        result.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'discount':
-        result.sort((a, b) => b.discount - a.discount);
+        result.sort((a, b) => (b.discount || 0) - (a.discount || 0));
+        break;
+      case 'name-asc':
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'sku':
+        result.sort((a, b) => (a.sku || '').localeCompare(b.sku || ''));
         break;
       case 'popular':
       default:
-        result.sort((a, b) => b.reviews - a.reviews);
+        result.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
         break;
     }
 
     return result;
-  }, [selectedCategory, searchQuery, priceRange, selectedBrands, sortBy]);
+  }, [selectedCategory, selectedTag, searchQuery, priceRange, selectedBrands, sortBy]);
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 180, behavior: 'smooth' });
+  };
 
   return (
     <div style={styles.page}>
@@ -97,10 +204,41 @@ export const Shop = () => {
         {/* Banner header */}
         <div style={styles.shopBanner}>
           <div style={styles.shopBannerText}>
-            <span style={styles.bannerBadge}>KIGALI MARKETPLACE</span>
-            <h2 style={styles.bannerTitle}>Shop Fresh Organics</h2>
-            <p style={styles.bannerDesc}>Premium farm produce, dairy, bakery and household goods delivered straight from local growers to your door.</p>
+            <span style={styles.bannerBadge}>SAWA CITI KIGALI CATALOG</span>
+            <h1 style={styles.bannerTitle}>All Supermarket Products</h1>
+            <p style={styles.bannerDesc}>
+              Browse over 4,600+ authentic Sawa Citi supermarket products. From fresh volcanic produce and pantry grains to fine beverages and household goods, delivered in 2 hours across Kigali.
+            </p>
           </div>
+        </div>
+
+        {/* Quick Tag Pills Bar */}
+        <div style={styles.tagPillBar}>
+          <button
+            onClick={() => handleTagSelect('all')}
+            style={{
+              ...styles.tagPillBtn,
+              backgroundColor: selectedTag === 'all' ? 'var(--color-primary-dark)' : '#FFFFFF',
+              color: selectedTag === 'all' ? '#FFFFFF' : 'var(--color-text)',
+              borderColor: selectedTag === 'all' ? 'var(--color-primary-dark)' : 'var(--color-border)',
+            }}
+          >
+            All Tags
+          </button>
+          {popularTags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => handleTagSelect(tag)}
+              style={{
+                ...styles.tagPillBtn,
+                backgroundColor: selectedTag === tag ? 'var(--color-primary-dark)' : '#FFFFFF',
+                color: selectedTag === tag ? '#FFFFFF' : 'var(--color-text)',
+                borderColor: selectedTag === tag ? 'var(--color-primary-dark)' : 'var(--color-border)',
+              }}
+            >
+              #{tag}
+            </button>
+          ))}
         </div>
 
         {/* Toolbar */}
@@ -111,18 +249,20 @@ export const Shop = () => {
               style={styles.filterToggleBtn}
               className="btn-outline"
             >
-              <Filter size={18} />
-              <span>Filters</span>
+              <Filter size={16} />
+              <span>Filters {selectedBrands.length > 0 ? `(${selectedBrands.length})` : ''}</span>
             </button>
             <span style={styles.productCount}>
-              Showing <strong>{filteredProducts.length}</strong> products
+              Showing <strong>{filteredProducts.length.toLocaleString()}</strong> products
+              {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
             </span>
           </div>
+
           <div style={styles.toolbarRight}>
-            <span style={styles.sortLabel}>Sort By:</span>
+            <span style={styles.sortLabel}>Sort:</span>
             <select 
               value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value)} 
+              onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }} 
               style={styles.sortSelect}
             >
               <option value="popular">Most Popular</option>
@@ -130,6 +270,8 @@ export const Shop = () => {
               <option value="price-high">Price: High to Low</option>
               <option value="rating">Top Rated</option>
               <option value="discount">Biggest Savings</option>
+              <option value="name-asc">Product Name (A-Z)</option>
+              <option value="sku">SKU Code</option>
             </select>
           </div>
         </div>
@@ -138,56 +280,65 @@ export const Shop = () => {
           {/* SIDEBAR FILTER PANEL */}
           <aside style={{
             ...styles.sidebar,
-            display: showMobileFilters ? 'block' : undefined // responsive control handled in CSS/flex wrapper
+            display: showMobileFilters ? 'block' : undefined
           }} className="shop-sidebar-responsive">
-            {/* Active filters heading */}
+            {/* Header */}
             <div style={styles.sidebarHeader}>
-              <h3 style={styles.sidebarTitle}>Filters</h3>
+              <h3 style={styles.sidebarTitle}>Refine Products</h3>
               <button onClick={resetFilters} style={styles.resetBtn}>
-                <RotateCcw size={14} /> Reset
+                <RotateCcw size={13} /> Reset
               </button>
             </div>
 
-            {/* Search filter */}
+            {/* Search Filter */}
             <div style={styles.filterWidget}>
-              <h4 style={styles.widgetTitle}>Search</h4>
+              <h4 style={styles.widgetTitle}>Search Catalog / SKU</h4>
               <div style={styles.searchBox}>
                 <Search size={16} color="var(--color-text-secondary)" style={styles.searchIcon} />
                 <input 
                   type="text" 
-                  placeholder="What are you looking for?"
+                  placeholder="Name, SKU (e.g. g001), brand..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                   style={styles.searchInput}
                 />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} style={styles.clearSearchBtn}>
+                    <X size={14} />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Categories filter */}
+            {/* Categories filter (12 Sawa Citi Categories) */}
             <div style={styles.filterWidget}>
-              <h4 style={styles.widgetTitle}>Categories</h4>
+              <h4 style={styles.widgetTitle}>Categories (12)</h4>
               <div style={styles.catList}>
                 <button 
-                  onClick={() => setSelectedCategory('all')} 
+                  onClick={() => handleCategorySelect('all')} 
                   style={{
                     ...styles.catLink,
-                    color: selectedCategory === 'all' ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
-                    fontWeight: selectedCategory === 'all' ? '700' : '500',
+                    backgroundColor: selectedCategory === 'all' ? 'var(--color-primary-light)' : 'transparent',
+                    color: selectedCategory === 'all' ? 'var(--color-primary-dark)' : 'var(--color-text)',
+                    fontWeight: selectedCategory === 'all' ? '800' : '500',
                   }}
                 >
-                  All Categories
+                  <span>🌟 All Categories</span>
+                  <span style={styles.catCountBadge}>{PRODUCTS.length}</span>
                 </button>
                 {CATEGORIES.map(cat => (
                   <button 
                     key={cat.id} 
-                    onClick={() => setSelectedCategory(cat.slug)} 
+                    onClick={() => handleCategorySelect(cat.slug)} 
                     style={{
                       ...styles.catLink,
-                      color: selectedCategory === cat.slug ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                      fontWeight: selectedCategory === cat.slug ? '700' : '500',
+                      backgroundColor: selectedCategory === cat.slug ? 'var(--color-primary-light)' : 'transparent',
+                      color: selectedCategory === cat.slug ? 'var(--color-primary-dark)' : 'var(--color-text)',
+                      fontWeight: selectedCategory === cat.slug ? '800' : '500',
                     }}
                   >
-                    {cat.name}
+                    <span>{cat.emoji} {cat.name}</span>
+                    <span style={styles.catCountBadge}>{cat.totalCount || cat.itemCount}</span>
                   </button>
                 ))}
               </div>
@@ -197,56 +348,117 @@ export const Shop = () => {
             <div style={styles.filterWidget}>
               <h4 style={styles.widgetTitle}>Max Price</h4>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={styles.priceLimit}>0 RWF</span>
-                <span style={styles.priceRangeVal}>{priceRange.toLocaleString()} RWF</span>
+                <span style={styles.priceLimit}>1,000 RWF</span>
+                <span style={styles.priceVal}>
+                  {priceRange >= 150000 ? 'Any Price' : `${priceRange.toLocaleString()} RWF`}
+                </span>
               </div>
               <input 
                 type="range" 
-                min="500" 
-                max="15000" 
-                step="500" 
+                min="2000" 
+                max="150000" 
+                step="2000"
                 value={priceRange} 
-                onChange={(e) => setPriceRange(Number(e.target.value))} 
-                style={styles.priceSlider}
+                onChange={(e) => { setPriceRange(Number(e.target.value)); setCurrentPage(1); }}
+                style={styles.rangeInput}
               />
             </div>
 
-            {/* Brands Filter checkboxes */}
-            <div style={styles.filterWidget}>
-              <h4 style={styles.widgetTitle}>Local Brands</h4>
-              <div style={styles.brandList}>
-                {allBrands.map(brand => (
-                  <label key={brand} style={styles.brandLabel}>
-                    <input 
-                      type="checkbox" 
-                      checked={selectedBrands.includes(brand)} 
-                      onChange={() => handleBrandChange(brand)} 
-                      style={styles.brandCheckbox}
-                    />
-                    <span>{brand}</span>
-                  </label>
-                ))}
+            {/* Brands Filter */}
+            {allBrands.length > 0 && (
+              <div style={styles.filterWidget}>
+                <h4 style={styles.widgetTitle}>Popular Brands</h4>
+                <div style={styles.brandList}>
+                  {allBrands.map((brand) => (
+                    <label key={brand} style={styles.checkboxLabel}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedBrands.includes(brand)}
+                        onChange={() => handleBrandChange(brand)}
+                        style={styles.checkbox}
+                      />
+                      <span style={styles.brandName}>{brand}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </aside>
 
-          {/* MAIN PRODUCTS GRID LIST */}
-          <main style={styles.mainGridWrapper}>
+          {/* MAIN PRODUCT CATALOG GRID */}
+          <main style={styles.mainCatalog}>
             {filteredProducts.length === 0 ? (
               <div style={styles.noResults}>
                 <span style={{ fontSize: '48px' }}>🔍</span>
-                <h4 style={styles.noResultsTitle}>No Products Found</h4>
-                <p style={styles.noResultsDesc}>We couldn't find any products matching your active filters. Try adjusting your searches or resetting the panel.</p>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', marginTop: '12px' }}>No products found</h3>
+                <p style={{ color: 'var(--color-text-secondary)', margin: '8px 0 20px 0' }}>
+                  No items matched your filters or search term "{searchQuery}". Try clearing filters or searching for another term.
+                </p>
                 <button onClick={resetFilters} className="btn btn-primary" style={{ borderRadius: '12px' }}>
                   Clear All Filters
                 </button>
               </div>
             ) : (
-              <div style={styles.productsGrid}>
-                {filteredProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div style={styles.productsGrid}>
+                  {paginatedProducts.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div style={styles.paginationRow}>
+                    <button 
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      style={{ ...styles.pageNavBtn, opacity: currentPage === 1 ? 0.4 : 1 }}
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft size={18} /> Prev
+                    </button>
+
+                    <div style={styles.pageNumbers}>
+                      {Array.from({ length: Math.min(totalPages, 7) }, (_, idx) => {
+                        let pageNum;
+                        if (totalPages <= 7) {
+                          pageNum = idx + 1;
+                        } else if (currentPage <= 4) {
+                          pageNum = idx + 1;
+                        } else if (currentPage >= totalPages - 3) {
+                          pageNum = totalPages - 6 + idx;
+                        } else {
+                          pageNum = currentPage - 3 + idx;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            style={{
+                              ...styles.pageNumBtn,
+                              backgroundColor: currentPage === pageNum ? 'var(--color-primary)' : '#FFFFFF',
+                              color: currentPage === pageNum ? '#FFFFFF' : 'var(--color-text)',
+                              fontWeight: currentPage === pageNum ? '800' : '600',
+                            }}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button 
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      style={{ ...styles.pageNavBtn, opacity: currentPage === totalPages ? 0.4 : 1 }}
+                      aria-label="Next page"
+                    >
+                      Next <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </main>
         </div>
@@ -257,137 +469,155 @@ export const Shop = () => {
 
 const styles = {
   page: {
-    padding: '32px 0 64px 0',
+    padding: '24px 0 64px 0',
   },
   shopBanner: {
-    backgroundImage: 'linear-gradient(135deg, var(--color-primary-dark) 0%, #157A4C 100%)',
-    borderRadius: '24px',
-    padding: '40px 32px',
+    backgroundImage: 'linear-gradient(135deg, var(--color-primary-dark) 0%, #0E623B 100%)',
+    borderRadius: '20px',
+    padding: '32px',
     color: '#FFFFFF',
-    marginBottom: '32px',
-    boxShadow: '0 8px 24px rgba(22, 58, 53, 0.08)',
+    marginBottom: '20px',
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.05)',
   },
   shopBannerText: {
-    maxWidth: '600px',
+    maxWidth: '680px',
   },
   bannerBadge: {
-    fontSize: '10px',
+    fontSize: '10.5px',
     fontWeight: '800',
     color: 'var(--color-accent)',
     letterSpacing: '1px',
     textTransform: 'uppercase',
     display: 'inline-block',
-    marginBottom: '8px',
+    marginBottom: '6px',
   },
   bannerTitle: {
-    fontSize: '32px',
+    fontSize: '28px',
     fontWeight: '800',
-    marginBottom: '12px',
+    marginBottom: '8px',
     color: '#FFFFFF',
   },
   bannerDesc: {
-    fontSize: '14px',
+    fontSize: '13.5px',
     lineHeight: '1.5',
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: 'rgba(255, 255, 255, 0.88)',
+  },
+  tagPillBar: {
+    display: 'flex',
+    gap: '8px',
+    overflowX: 'auto',
+    paddingBottom: '12px',
+    marginBottom: '16px',
+    scrollbarWidth: 'none',
+  },
+  tagPillBtn: {
+    padding: '6px 14px',
+    borderRadius: '20px',
+    border: '1px solid var(--color-border)',
+    fontSize: '12px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    transition: 'all 0.2s',
   },
   toolbar: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '24px',
+    marginBottom: '20px',
     borderBottom: '1px solid var(--color-border)',
-    paddingBottom: '16px',
+    paddingBottom: '14px',
     flexWrap: 'wrap',
-    gap: '16px',
+    gap: '12px',
   },
   toolbarLeft: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: '14px',
   },
   filterToggleBtn: {
-    display: 'none', // Shown on mobile responsive media query
+    display: 'none',
     alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    borderRadius: '10px',
+    gap: '6px',
+    padding: '6px 12px',
+    borderRadius: '8px',
     cursor: 'pointer',
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '600',
     backgroundColor: '#FFFFFF',
     border: '1.5px solid var(--color-border)',
   },
   productCount: {
-    fontSize: '14px',
+    fontSize: '13.5px',
     color: 'var(--color-text-secondary)',
   },
   toolbarRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
   },
   sortLabel: {
-    fontSize: '14px',
-    color: 'var(--color-text-secondary)',
+    fontSize: '13px',
     fontWeight: '600',
+    color: 'var(--color-text-secondary)',
   },
   sortSelect: {
-    padding: '8px 16px',
+    padding: '7px 12px',
     borderRadius: '10px',
     border: '1.5px solid var(--color-border)',
-    fontSize: '14px',
+    backgroundColor: '#FFFFFF',
+    fontSize: '13px',
+    fontWeight: '600',
     color: 'var(--color-text)',
     outline: 'none',
-    fontWeight: '600',
-    backgroundColor: '#FFFFFF',
+    cursor: 'pointer',
   },
   shopLayout: {
-    display: 'flex',
-    gap: '32px',
+    display: 'grid',
+    gridTemplateColumns: '260px 1fr',
+    gap: '28px',
   },
   sidebar: {
-    width: '260px',
-    flexShrink: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: '18px',
+    border: '1px solid var(--color-border)',
+    padding: '20px',
+    height: 'fit-content',
   },
   sidebarHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '20px',
-    borderBottom: '1.5px solid var(--color-border)',
+    marginBottom: '16px',
     paddingBottom: '12px',
+    borderBottom: '1px solid var(--color-border)',
   },
   sidebarTitle: {
-    fontSize: '18px',
+    fontSize: '15px',
     fontWeight: '800',
     color: 'var(--color-text)',
-    margin: 0,
   },
   resetBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'var(--color-text-secondary)',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     gap: '4px',
-    padding: 0,
-    transition: 'color 0.2s',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'var(--color-primary-dark)',
+    fontSize: '12px',
+    fontWeight: '700',
+    cursor: 'pointer',
   },
   filterWidget: {
-    marginBottom: '24px',
-    borderBottom: '1px dashed var(--color-border)',
-    paddingBottom: '20px',
+    marginBottom: '20px',
   },
   widgetTitle: {
-    fontSize: '14px',
-    fontWeight: '800',
+    fontSize: '13px',
+    fontWeight: '700',
     color: 'var(--color-text)',
-    marginBottom: '14px',
+    marginBottom: '10px',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.4px',
   },
   searchBox: {
     position: 'relative',
@@ -396,103 +626,142 @@ const styles = {
   },
   searchIcon: {
     position: 'absolute',
-    left: '12px',
+    left: '10px',
   },
   searchInput: {
     width: '100%',
-    padding: '10px 12px 10px 36px',
+    padding: '8px 30px 8px 32px',
     borderRadius: '10px',
     border: '1.5px solid var(--color-border)',
+    fontSize: '12.5px',
     outline: 'none',
-    fontSize: '14px',
-    color: 'var(--color-text)',
-    transition: 'border-color 0.2s',
+  },
+  clearSearchBtn: {
+    position: 'absolute',
+    right: '8px',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'var(--color-text-secondary)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
   },
   catList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '2px',
+    maxHeight: '320px',
+    overflowY: 'auto',
+    paddingRight: '4px',
   },
   catLink: {
-    background: 'none',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    padding: '7px 10px',
+    borderRadius: '8px',
     border: 'none',
+    fontSize: '12.5px',
     textAlign: 'left',
-    fontSize: '14px',
     cursor: 'pointer',
-    padding: 0,
-    transition: 'color 0.2s',
+    transition: 'background 0.15s',
+  },
+  catCountBadge: {
+    fontSize: '11px',
+    color: 'var(--color-text-secondary)',
+    fontWeight: '500',
   },
   priceLimit: {
-    fontSize: '12px',
+    fontSize: '11.5px',
     color: 'var(--color-text-secondary)',
   },
-  priceRangeVal: {
-    fontSize: '13px',
+  priceVal: {
+    fontSize: '12px',
     fontWeight: '700',
     color: 'var(--color-primary-dark)',
   },
-  priceSlider: {
+  rangeInput: {
     width: '100%',
-    height: '6px',
-    borderRadius: '3px',
     accentColor: 'var(--color-primary)',
     cursor: 'pointer',
   },
   brandList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '6px',
+    maxHeight: '180px',
+    overflowY: 'auto',
+    paddingRight: '4px',
   },
-  brandLabel: {
+  checkboxLabel: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    fontSize: '14px',
+    gap: '8px',
+    fontSize: '12px',
     color: 'var(--color-text)',
     cursor: 'pointer',
-    userSelect: 'none',
   },
-  brandCheckbox: {
-    width: '16px',
-    height: '16px',
-    borderRadius: '4px',
+  checkbox: {
     accentColor: 'var(--color-primary)',
-    cursor: 'pointer',
   },
-  mainGridWrapper: {
-    flexGrow: 1,
+  brandName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  mainCatalog: {
+    minWidth: 0,
+  },
+  noResults: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '18px',
+    border: '1px solid var(--color-border)',
+    padding: '48px 24px',
+    textAlign: 'center',
   },
   productsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '20px',
-    '@media (max-width: 1024px)': {
-      gridTemplateColumns: 'repeat(2, 1fr)',
-    },
-    '@media (max-width: 600px)': {
-      gridTemplateColumns: '1fr',
-    },
-  },
-  noResults: {
-    textAlign: 'center',
-    padding: '64px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '16px',
-    backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
+    marginBottom: '32px',
+  },
+  paginationRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '16px 0',
+  },
+  pageNavBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '8px 14px',
+    borderRadius: '10px',
     border: '1.5px solid var(--color-border)',
-  },
-  noResultsTitle: {
-    fontSize: '20px',
-    fontWeight: '800',
+    backgroundColor: '#FFFFFF',
+    fontSize: '13px',
+    fontWeight: '700',
     color: 'var(--color-text)',
+    cursor: 'pointer',
   },
-  noResultsDesc: {
-    fontSize: '14px',
-    color: 'var(--color-text-secondary)',
-    maxWidth: '400px',
-    lineHeight: '1.5',
+  pageNumbers: {
+    display: 'flex',
+    gap: '6px',
+  },
+  pageNumBtn: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    border: '1px solid var(--color-border)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '13px',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
   },
 };
+
+export default Shop;
