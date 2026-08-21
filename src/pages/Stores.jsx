@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { STORES } from '../data/mockData';
 import { MapPin, Phone, Clock, Compass, Check, ArrowRight } from 'lucide-react';
 
 export const Stores = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { setLocation, addToast } = useApp();
 
   const [activeTab, setActiveTab] = useState('all');
@@ -134,7 +136,7 @@ export const Stores = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

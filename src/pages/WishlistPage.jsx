@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCTS } from '../data/mockData';
@@ -7,6 +8,7 @@ import { ArrowLeft, Heart } from 'lucide-react';
 
 export const WishlistPage = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { wishlist } = useApp();
 
   // Extract products in wishlist
@@ -49,7 +51,7 @@ export const WishlistPage = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

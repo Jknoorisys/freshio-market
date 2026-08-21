@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES, PRODUCTS, CATEGORY_ALIASES } from '../data/mockData';
 import { 
@@ -17,8 +18,9 @@ import {
 const ITEMS_PER_PAGE = 32;
 
 export const Category = () => {
-  const { slug } = useParams();
+  const slug = useParams().slug;
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { addToast } = useApp();
 
   // Resolve slug with aliases
@@ -363,7 +365,7 @@ export const Category = () => {
               </div>
             ) : (
               <>
-                <div style={styles.grid}>
+                <div style={styles.productsGrid}>
                   {paginatedProducts.map(product => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -428,7 +430,7 @@ export const Category = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '24px 0 64px 0',
   },
@@ -543,13 +545,16 @@ const styles = {
     display: 'none',
     alignItems: 'center',
     gap: '6px',
-    padding: '6px 12px',
-    borderRadius: '8px',
+    padding: '8px 14px',
+    borderRadius: '10px',
     cursor: 'pointer',
     fontSize: '13px',
-    fontWeight: '600',
+    fontWeight: '700',
     backgroundColor: '#FFFFFF',
     border: '1.5px solid var(--color-border)',
+    '@media (max-width: 1024px)': {
+      display: 'flex',
+    }
   },
   productCount: {
     fontSize: '13.5px',
@@ -580,6 +585,10 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: '260px 1fr',
     gap: '28px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: '1fr',
+      gap: '16px',
+    }
   },
   sidebar: {
     backgroundColor: '#FFFFFF',
@@ -587,6 +596,19 @@ const styles = {
     border: '1px solid var(--color-border)',
     padding: '20px',
     height: 'fit-content',
+    '@media (max-width: 1024px)': {
+      display: 'none',
+      position: 'fixed',
+      top: '60px',
+      left: 0,
+      right: 0,
+      bottom: '64px',
+      zIndex: 850,
+      overflowY: 'auto',
+      borderRadius: 0,
+      border: 'none',
+      padding: '20px 24px',
+    }
   },
   sidebarHeader: {
     display: 'flex',
@@ -709,11 +731,19 @@ const styles = {
     padding: '48px 24px',
     textAlign: 'center',
   },
-  grid: {
+  productsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '16px',
     marginBottom: '32px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '12px',
+    },
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '8px',
+    }
   },
   paginationRow: {
     display: 'flex',

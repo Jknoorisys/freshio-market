@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { Mail, Phone, MapPin, Send, Loader2, Clock } from 'lucide-react';
 
 export const Contact = () => {
+  const styles = useResponsiveStyles(rawStyles);
   const { addToast } = useApp();
 
   const [name, setName] = useState('');
@@ -163,7 +165,7 @@ export const Contact = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

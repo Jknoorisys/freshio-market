@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { Trash2, ShoppingBag, Plus, Minus, Tag, AlertCircle } from 'lucide-react';
 
 export const CartPage = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { cart, updateCartQuantity, deleteFromCart, getSubtotal, getDiscount, getDeliveryFee, getTax, addToast } = useApp();
 
   const [couponCode, setCouponCode] = useState('');
@@ -238,7 +240,7 @@ export const CartPage = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

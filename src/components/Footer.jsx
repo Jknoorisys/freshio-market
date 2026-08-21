@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Logo } from './Logo';
 import { Send, Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 
 export const Footer = () => {
   const { newsletterSubscribed, subscribeNewsletter } = useApp();
   const [email, setEmail] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const styles = useResponsiveStyles(rawStyles);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -198,7 +200,7 @@ export const Footer = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   footer: {
     backgroundColor: '#12201A',
     color: '#D8EAE2',
@@ -216,6 +218,11 @@ const styles = {
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: '28px',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      gap: '20px',
+    }
   },
   newsletterText: { flex: '1 1 380px' },
   newsletterBadge: {
@@ -243,6 +250,9 @@ const styles = {
     gap: '10px',
     flex: '1 1 350px',
     maxWidth: '480px',
+    '@media (max-width: 480px)': {
+      flexDirection: 'column',
+    }
   },
   inputWrapper: {
     display: 'flex',
@@ -286,6 +296,14 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: '1.4fr 0.9fr 0.9fr 0.9fr 1.1fr',
     gap: '40px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: '1fr 1fr',
+      gap: '28px',
+    },
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: '1fr',
+      gap: '24px',
+    }
   },
   logoCol: {
     display: 'flex',

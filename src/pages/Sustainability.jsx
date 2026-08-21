@@ -1,7 +1,9 @@
 import React from 'react';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { ShieldCheck, Recycle, Heart, HelpCircle, TreePine, Sparkles } from 'lucide-react';
 
 export const Sustainability = () => {
+  const styles = useResponsiveStyles(rawStyles);
   return (
     <div style={styles.page}>
       <div className="container">
@@ -56,7 +58,7 @@ export const Sustainability = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

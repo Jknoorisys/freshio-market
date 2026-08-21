@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { STORES } from '../data/mockData';
 import { ArrowLeft, MapPin, Phone, Clock, Compass, CheckCircle2, ShieldCheck, Mail, ShieldAlert } from 'lucide-react';
@@ -7,6 +8,7 @@ import { ArrowLeft, MapPin, Phone, Clock, Compass, CheckCircle2, ShieldCheck, Ma
 export const StoreDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { setLocation, addToast } = useApp();
 
   // Find store by route ID parameter
@@ -129,7 +131,7 @@ export const StoreDetail = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { FAQS } from '../data/mockData';
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
 
 export const FAQ = () => {
+  const styles = useResponsiveStyles(rawStyles);
   // Store ID of the active expanded FAQ accordion
   const [expandedFaq, setExpandedFaq] = useState(null);
 
@@ -61,9 +63,12 @@ export const FAQ = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
+    '@media (max-width: 768px)': {
+      padding: '24px 0 40px 0',
+    }
   },
   container: {
     maxWidth: '720px',
@@ -81,6 +86,9 @@ const styles = {
     fontWeight: '800',
     color: 'var(--color-text)',
     marginBottom: '12px',
+    '@media (max-width: 768px)': {
+      fontSize: '24px',
+    }
   },
   desc: {
     fontSize: '14px',
@@ -111,6 +119,9 @@ const styles = {
     textAlign: 'left',
     cursor: 'pointer',
     outline: 'none',
+    '@media (max-width: 600px)': {
+      padding: '16px 18px',
+    }
   },
   faqQuestion: {
     fontSize: '15px',

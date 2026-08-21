@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { Check, Calendar, MapPin, Truck, HelpCircle } from 'lucide-react';
 
 export const OrderSuccess = () => {
+  const styles = useResponsiveStyles(rawStyles);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -141,9 +143,12 @@ export const OrderSuccess = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '64px 0 96px 0',
+    '@media (max-width: 600px)': {
+      padding: '24px 0 60px 0',
+    }
   },
   cardContainer: {
     maxWidth: '560px',
@@ -157,6 +162,10 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    '@media (max-width: 600px)': {
+      padding: '24px 16px',
+      borderRadius: '16px',
+    }
   },
   successIconShield: {
     marginBottom: '20px',
@@ -184,6 +193,9 @@ const styles = {
     fontWeight: '800',
     color: 'var(--color-text)',
     marginBottom: '12px',
+    '@media (max-width: 600px)': {
+      fontSize: '22px',
+    }
   },
   successDesc: {
     fontSize: '14px',
@@ -221,6 +233,10 @@ const styles = {
     display: 'flex',
     gap: '12px',
     alignItems: 'start',
+    '@media (max-width: 600px)': {
+      flexDirection: 'column',
+      gap: '8px',
+    }
   },
   receiptInfoBlock: {
     display: 'flex',

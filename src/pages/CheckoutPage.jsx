@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { Phone, ArrowLeft, Loader2, Sparkles, MapPin, Calendar, Wallet } from 'lucide-react';
 
 export const CheckoutPage = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { cart, getSubtotal, getDiscount, getDeliveryFee, getTax, getTotal, clearCart, addOrder, addToast } = useApp();
 
   // --- FORM STATE ---
@@ -399,7 +401,7 @@ export const CheckoutPage = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

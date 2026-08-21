@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, ShoppingBag, Eye, Calendar, DollarSign, Clock } from 'lucide-react';
 
 export const OrdersPage = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { orders } = useApp();
 
   const getStatusColor = (status) => {
@@ -99,7 +101,7 @@ export const OrdersPage = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

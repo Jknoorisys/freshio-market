@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES, PRODUCTS } from '../data/mockData';
 import { 
@@ -19,6 +20,7 @@ const ITEMS_PER_PAGE = 32;
 export const Shop = () => {
   const { addToast } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
+  const styles = useResponsiveStyles(rawStyles);
   
   // Read initial query params from URL
   const initialCategory = searchParams.get('category') || 'all';
@@ -467,9 +469,12 @@ export const Shop = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '24px 0 64px 0',
+    '@media (max-width: 768px)': {
+      padding: '12px 0 40px 0',
+    }
   },
   shopBanner: {
     backgroundImage: 'linear-gradient(135deg, var(--color-primary-dark) 0%, #0E623B 100%)',
@@ -478,6 +483,10 @@ const styles = {
     color: '#FFFFFF',
     marginBottom: '20px',
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.05)',
+    '@media (max-width: 768px)': {
+      padding: '20px',
+      borderRadius: '16px',
+    }
   },
   shopBannerText: {
     maxWidth: '680px',
@@ -496,11 +505,17 @@ const styles = {
     fontWeight: '800',
     marginBottom: '8px',
     color: '#FFFFFF',
+    '@media (max-width: 768px)': {
+      fontSize: '22px',
+    }
   },
   bannerDesc: {
     fontSize: '13.5px',
     lineHeight: '1.5',
     color: 'rgba(255, 255, 255, 0.88)',
+    '@media (max-width: 768px)': {
+      fontSize: '12px',
+    }
   },
   tagPillBar: {
     display: 'flex',
@@ -529,6 +544,9 @@ const styles = {
     paddingBottom: '14px',
     flexWrap: 'wrap',
     gap: '12px',
+    '@media (max-width: 768px)': {
+      gap: '8px',
+    }
   },
   toolbarLeft: {
     display: 'flex',
@@ -539,13 +557,16 @@ const styles = {
     display: 'none',
     alignItems: 'center',
     gap: '6px',
-    padding: '6px 12px',
-    borderRadius: '8px',
+    padding: '8px 14px',
+    borderRadius: '10px',
     cursor: 'pointer',
     fontSize: '13px',
-    fontWeight: '600',
+    fontWeight: '700',
     backgroundColor: '#FFFFFF',
     border: '1.5px solid var(--color-border)',
+    '@media (max-width: 1024px)': {
+      display: 'flex',
+    }
   },
   productCount: {
     fontSize: '13.5px',
@@ -555,6 +576,10 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
+    '@media (max-width: 600px)': {
+      width: '100%',
+      justifyContent: 'space-between',
+    }
   },
   sortLabel: {
     fontSize: '13px',
@@ -576,6 +601,10 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: '260px 1fr',
     gap: '28px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: '1fr',
+      gap: '16px',
+    }
   },
   sidebar: {
     backgroundColor: '#FFFFFF',
@@ -583,6 +612,19 @@ const styles = {
     border: '1px solid var(--color-border)',
     padding: '20px',
     height: 'fit-content',
+    '@media (max-width: 1024px)': {
+      display: 'none',
+      position: 'fixed',
+      top: '60px',
+      left: 0,
+      right: 0,
+      bottom: '64px',
+      zIndex: 850,
+      overflowY: 'auto',
+      borderRadius: 0,
+      border: 'none',
+      padding: '20px 24px',
+    }
   },
   sidebarHeader: {
     display: 'flex',
@@ -725,6 +767,14 @@ const styles = {
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '16px',
     marginBottom: '32px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '12px',
+    },
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '8px',
+    }
   },
   paginationRow: {
     display: 'flex',

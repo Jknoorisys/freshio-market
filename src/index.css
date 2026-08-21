@@ -437,7 +437,7 @@ ul, ol {
   border-radius: 50%;
   display: flex;
   align-items: center;
-  justifyContent: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   background-color: #F3F6F4;
@@ -799,3 +799,14 @@ ul, ol {
 .dashboard-promo-card a:hover {
   filter: brightness(1.08);
 }
+
+/* Responsive Header Overrides */
+@media (max-width: 1024px) {
+  .header-account-widget {
+    display: none !important;
+  }
+  .header-cart-total-text {
+    display: none !important;
+  }
+}
+

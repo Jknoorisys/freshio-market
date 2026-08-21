@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, Clock, MapPin, CreditCard, Check } from 'lucide-react';
 
 export const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { orders } = useApp();
 
   // Find matching order in user session history, or fallback to mock order
@@ -175,7 +177,7 @@ export const OrderDetail = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

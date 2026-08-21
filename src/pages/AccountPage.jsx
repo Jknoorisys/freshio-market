@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { useApp } from '../context/AppContext';
 import { User, ShoppingBag, Heart, Award, MapPin, Key, LogOut, Check, Star } from 'lucide-react';
 
 export const AccountPage = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const { user, toggleMembership, orders, wishlist, addToast } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState('profile');
@@ -215,7 +217,7 @@ export const AccountPage = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },

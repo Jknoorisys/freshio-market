@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { ProductCard } from '../components/ProductCard';
 import { CATEGORIES, PRODUCTS, STORES } from '../data/mockData';
 import { PromoPopup } from '../components/PromoPopup';
@@ -42,6 +43,7 @@ const CATEGORY_IMAGES = {
 export const Home = () => {
   const { addToCart, toggleWishlist, wishlist, user, toggleMembership, selectStore, activeStore } = useApp();
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
 
   // --- STATS COUNT ANIMATION ---
   const [shoppersCount, setShoppersCount] = useState(0);
@@ -897,7 +899,7 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleSheet);
 }
 
-const styles = {
+const rawStyles = {
   page: {
     paddingBottom: '40px',
   },

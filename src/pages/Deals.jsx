@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCTS } from '../data/mockData';
 import { Sparkles, Timer, Percent, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,6 +9,7 @@ const ITEMS_PER_PAGE = 32;
 
 export const Deals = () => {
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Simulate deal expiration countdown
@@ -131,9 +133,12 @@ export const Deals = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '32px 0 80px 0',
+    '@media (max-width: 768px)': {
+      padding: '16px 0 40px 0',
+    }
   },
   banner: {
     backgroundImage: 'linear-gradient(135deg, #FF5A5F 0%, #D83B41 100%)',
@@ -167,6 +172,9 @@ const styles = {
     fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: '12px',
+    '@media (max-width: 768px)': {
+      fontSize: '24px',
+    }
   },
   desc: {
     fontSize: '14px',
@@ -224,6 +232,14 @@ const styles = {
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '18px',
     marginBottom: '32px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '14px',
+    },
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '10px',
+    }
   },
   paginationRow: {
     display: 'flex',

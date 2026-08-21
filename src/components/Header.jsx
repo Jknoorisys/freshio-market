@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Logo } from './Logo';
+import { useResponsiveStyles, useWindowWidth } from '../hooks/useResponsiveStyles';
 import { 
   Search, 
   MapPin, 
@@ -30,6 +31,9 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const width = useWindowWidth();
+  const styles = useResponsiveStyles(rawStyles);
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + ((item.product.price || 0) * item.quantity), 0);
@@ -92,7 +96,7 @@ export const Header = () => {
 
             {/* Bigger & Clearer Logo */}
             <Link to="/" className="header-logo-link" style={styles.logoWrapper}>
-              <Logo variant="dark" height={48} showTagline={false} />
+              <Logo variant="dark" height={width <= 1024 ? 36 : 48} showTagline={false} />
             </Link>
 
             {/* Desktop Nav - Strict Single Line */}
@@ -240,9 +244,15 @@ export const Header = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   header: { position: 'sticky', top: 0, left: 0, right: 0, zIndex: 900, backgroundColor: '#FFFFFF', transition: 'box-shadow 0.3s ease' },
-  topBar: { backgroundColor: '#163A35', padding: '9px 0' },
+  topBar: { 
+    backgroundColor: '#163A35', 
+    padding: '9px 0',
+    '@media (max-width: 1024px)': {
+      display: 'none',
+    }
+  },
   topBarInner: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   topBarLeft: { display: 'flex', alignItems: 'center', gap: '24px' },
   topBarRight: { display: 'flex', alignItems: 'center', gap: '20px' },
@@ -250,9 +260,29 @@ const styles = {
   topBarText: { fontSize: '12px', color: '#FFFFFF', fontWeight: '600' },
   changeLink: { fontSize: '12px', color: '#279E53', fontWeight: '700', textDecoration: 'underline', cursor: 'pointer', marginLeft: '2px' },
   mainBar: { borderBottom: '1px solid var(--color-border)', backgroundColor: '#FFFFFF' },
-  mainBarInner: { height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '28px' },
+  mainBarInner: { 
+    height: '80px', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    gap: '28px',
+    '@media (max-width: 1024px)': {
+      height: '60px',
+      gap: '12px',
+    }
+  },
   logoWrapper: { display: 'flex', alignItems: 'center', flexShrink: 0, textDecoration: 'none' },
-  navDesktop: { display: 'flex', alignItems: 'center', gap: '24px', flex: 1, paddingLeft: '12px', flexWrap: 'nowrap' },
+  navDesktop: { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '24px', 
+    flex: 1, 
+    paddingLeft: '12px', 
+    flexWrap: 'nowrap',
+    '@media (max-width: 1024px)': {
+      display: 'none',
+    }
+  },
   navLinkContainer: { position: 'relative', cursor: 'pointer', display: 'inline-block', flexShrink: 0 },
   megaMenu: { position: 'absolute', top: 'calc(100% + 14px)', left: '-10px', backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '24px', boxShadow: '0 24px 64px rgba(22,58,53,0.13)', width: '760px', padding: '24px', zIndex: 950, animation: 'fadeInUp 0.18s ease-out' },
   megaMenuHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)', marginBottom: '16px' },
@@ -266,8 +296,29 @@ const styles = {
   megaMenuFooter: { marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--color-border)' },
   megaMenuPromo: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--color-primary-light)', padding: '10px 16px', borderRadius: '12px', color: 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700' },
   promoLink: { display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary-dark)', textDecoration: 'underline' },
-  actionsRight: { display: 'flex', alignItems: 'center', gap: '22px', flexShrink: 0 },
-  mobileMenuToggle: { display: 'none', cursor: 'pointer', color: 'var(--color-text)', backgroundColor: '#F5F7F6', padding: '9px', borderRadius: '10px', alignItems: 'center', justifyContent: 'center', border: 'none' },
+  actionsRight: { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '22px', 
+    flexShrink: 0,
+    '@media (max-width: 1024px)': {
+      gap: '12px',
+    }
+  },
+  mobileMenuToggle: { 
+    display: 'none', 
+    cursor: 'pointer', 
+    color: 'var(--color-text)', 
+    backgroundColor: '#F5F7F6', 
+    padding: '9px', 
+    borderRadius: '10px', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    border: 'none',
+    '@media (max-width: 1024px)': {
+      display: 'flex',
+    }
+  },
   mobileNavMenu: { position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#FFFFFF', boxShadow: '0 12px 32px rgba(0,0,0,0.08)', borderBottom: '1px solid var(--color-border)', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px', animation: 'fadeInDown 0.2s ease-out', zIndex: 890 },
   mobileSearchRow: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', backgroundColor: '#F3F4F6', color: 'var(--color-text-secondary)', fontSize: '13px', cursor: 'pointer' },
   mobileLink: { fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', padding: '4px 0', textDecoration: 'none' },

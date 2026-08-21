@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCTS, findProduct } from '../data/mockData';
 import { 
@@ -23,6 +24,7 @@ import {
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const styles = useResponsiveStyles(rawStyles);
   
   const { cart, addToCart, wishlist, toggleWishlist, addToast } = useApp();
 
@@ -400,7 +402,7 @@ export const ProductDetail = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '24px 0 64px 0',
   },
@@ -465,6 +467,11 @@ const styles = {
     borderRadius: '24px',
     border: '1px solid var(--color-border)',
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.03)',
+    '@media (max-width: 900px)': {
+      gridTemplateColumns: '1fr',
+      gap: '24px',
+      padding: '20px',
+    }
   },
   imageCol: {
     display: 'flex',
@@ -483,6 +490,10 @@ const styles = {
     overflow: 'hidden',
     border: '1px solid var(--color-border)',
     padding: '24px',
+    '@media (max-width: 600px)': {
+      height: '280px',
+      padding: '16px',
+    }
   },
   mainImage: {
     maxHeight: '100%',
@@ -677,6 +688,10 @@ const styles = {
     gap: '12px',
     marginBottom: '28px',
     alignItems: 'center',
+    '@media (max-width: 600px)': {
+      flexWrap: 'wrap',
+      gap: '8px',
+    }
   },
   qtyControl: {
     display: 'flex',
@@ -741,6 +756,9 @@ const styles = {
     gap: '16px',
     borderTop: '1px solid var(--color-border)',
     paddingTop: '20px',
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: '1fr',
+    }
   },
   guaranteeItem: {
     display: 'flex',
@@ -831,6 +849,14 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '20px',
+    '@media (max-width: 1024px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '16px',
+    },
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '10px',
+    }
   },
 };
 

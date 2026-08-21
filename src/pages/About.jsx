@@ -1,7 +1,9 @@
 import React from 'react';
+import { useResponsiveStyles } from '../hooks/useResponsiveStyles';
 import { Award, Leaf, Truck, ShieldCheck } from 'lucide-react';
 
 export const About = () => {
+  const styles = useResponsiveStyles(rawStyles);
   return (
     <div style={styles.page}>
       <div className="container">
@@ -82,7 +84,7 @@ export const About = () => {
   );
 };
 
-const styles = {
+const rawStyles = {
   page: {
     padding: '40px 0 80px 0',
   },
